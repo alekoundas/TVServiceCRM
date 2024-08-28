@@ -4,9 +4,9 @@
 dotnet ef migrations script --project DataAccess
 
 dotnet ef migrations add InitialMigration --project DataAccess --verbose
-dotnet ef migrations add InitialMigration3 --project DataAccess --startup-project Api
+ dotnet ef migrations add InitialMigration1 --project TVServiceCRM.Server.DataAccess --startup-project TVServiceCRM.Server
 
-dotnet ef database update --project DataAccess --startup-project Api
+dotnet ef database update --project TVServiceCRM.Server.DataAccess --startup-project TVServiceCRM.Server
 
 
 
@@ -38,6 +38,7 @@ PS C:\Users\psych> $conn = New-Object System.Data.SqlClient.SqlConnection
 PS C:\Users\psych> $conn.ConnectionString = "Server=localhost, 1433;Initial Catalog=TVServiceDB;Persist Security Info=False;User ID=sa;Password=P@ssw0rd;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=False;Connection Timeout=30;"
 PS C:\Users\psych> $conn.Open()
 PS C:\Users\psych> $conn.Close()
+
 
 
 

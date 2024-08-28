@@ -2,7 +2,8 @@
 
 # This stage is used when running from VS in fast mode (Default for Debug configuration)
 FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
-USER app
+#USER app
+VOLUME /app/VolumeDB
 WORKDIR /app
 EXPOSE 8080
 EXPOSE 8081
@@ -20,7 +21,11 @@ FROM with-node AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
 COPY ["TVServiceCRM.Server/TVServiceCRM.Server.csproj", "TVServiceCRM.Server/"]
+COPY ["TVServiceCRM.Server.Business/TVServiceCRM.Server.Business.csproj", "TVServiceCRM.Server.Business/"]
+COPY ["TVServiceCRM.Server.DataAccess/TVServiceCRM.Server.DataAccess.csproj", "TVServiceCRM.Server.DataAccess/"]
+COPY ["TVServiceCRM.Server.Model/TVServiceCRM.Server.Model.csproj", "TVServiceCRM.Server.Model/"]
 COPY ["tvservicecrm.client/tvservicecrm.client.esproj", "tvservicecrm.client/"]
+
 RUN dotnet restore "./TVServiceCRM.Server/TVServiceCRM.Server.csproj"
 COPY . .
 WORKDIR "/src/TVServiceCRM.Server"

@@ -9,5 +9,17 @@ export class ContactInformationDto {
   isFavorite: boolean = false;
 
   customerId: number = 0;
-  customer: CustomerDto;
+  customer?: CustomerDto;
+}
+
+export interface ContactInformationDto {
+  [key: string]: any;
+  id: number;
+  type: ContactInformationTypesEnum;
+  value: string;
+  description: string;
+  isFavorite: boolean;
+
+  customerId: number;
+  customer?: CustomerDto;
 }

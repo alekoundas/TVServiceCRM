@@ -79,10 +79,11 @@ namespace TVServiceCRM.Server.Controllers
 
         // GET: api/Tickets
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Ticket>>> GetTickets()
+        //public async Task<ActionResult<IEnumerable<Ticket>>> GetTickets()
+        public string gettickets()
         {
-            List<Ticket> result = await _dataService.Tickets.GetPaggingWithFilterAndSort(null, null, null);
-            return result;
+            //List<Ticket> result = await _dataService.Tickets.GetPaggingWithFilterAndSort(null, null, null);
+            return Directory.GetCurrentDirectory() + "/VolumeDB/TVServiceCRM.db";
         }
 
         // GET: api/Tickets/5

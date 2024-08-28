@@ -1,7 +1,7 @@
 import { DataTableDto } from "../model/DataTableDto";
 
 export class ApiService {
-  static serverUrl = "https://localhost:5037/api/";
+  static serverUrl = "https://localhost:8081/api/";
   // static myInstance = null;
 
   // static getInstance() {
@@ -52,7 +52,7 @@ export class ApiService {
     data: TEntity
   ): Promise<TEntity | null> {
     try {
-        const response = await fetch(this.serverUrl + controller, {
+      const response = await fetch(this.serverUrl + controller, {
         method: "POST",
         body: JSON.stringify(data),
         headers: {
@@ -60,7 +60,7 @@ export class ApiService {
         },
       });
 
-        const responseJson = await response.json();
+      const responseJson = await response.json();
 
       return responseJson;
     } catch (error) {

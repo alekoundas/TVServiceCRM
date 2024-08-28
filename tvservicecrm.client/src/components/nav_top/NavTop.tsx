@@ -1,4 +1,3 @@
-import React from "react";
 import { Menubar } from "primereact/menubar";
 import { InputText } from "primereact/inputtext";
 import { Badge } from "primereact/badge";
@@ -8,7 +7,7 @@ import { useNavigate } from "react-router-dom";
 function NavTop() {
   const navigate = useNavigate();
 
-  const itemRenderer = (item) => (
+  const itemRenderer = (item: any) => (
     <a className="flex align-items-center p-menuitem-link">
       <span className={item.icon} />
       <span className="mx-2">{item.label}</span>

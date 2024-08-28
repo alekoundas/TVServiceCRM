@@ -1,10 +1,10 @@
 import { CustomerDto } from "./CustomerDto";
 
 export class TicketDto {
-  id: number;
+  id: number = 0;
   title: string = "";
   description: string = "";
-  completedOn: Date;
-  customerId: Date;
-  customer: CustomerDto;
+  completedOn: Date = new Date();
+  customerId: Date = new Date();
+  customer: CustomerDto = new CustomerDto();
 }

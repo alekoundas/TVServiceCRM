@@ -1,10 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {
-  useLocation,
-  useNavigate,
-  useParams,
-  useSearchParams,
-} from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card } from "primereact/card";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
@@ -21,7 +16,7 @@ import { Calendar } from "primereact/calendar";
 
 function Customers() {
   const navigate = useNavigate();
-  const [UrlParameters, setUrlParameters] = useSearchParams();
+  const [UrlParameters, _setUrlParameters] = useSearchParams();
 
   var formCustomer = new CustomerDto();
   const [isInitialised, setIsInitialised] = useState(false);
@@ -48,13 +43,13 @@ function Customers() {
     },
   });
 
-  const paginatorLeft = (
-    <Button
-      type="button"
-      icon="pi pi-refresh"
-      text
-    />
-  );
+  // const paginatorLeft = (
+  //   <Button
+  //     type="button"
+  //     icon="pi pi-refresh"
+  //     text
+  //   />
+  // );
 
   useEffect(() => {
     setLoading(true);
@@ -118,7 +113,7 @@ function Customers() {
     setRefreshDataState(!refreshDataState);
   };
 
-  const activityRowFilterTemplate = (options) => {
+  const activityRowFilterTemplate = (options: any) => {
     return (
       <div className="flex gap-1">
         <Calendar

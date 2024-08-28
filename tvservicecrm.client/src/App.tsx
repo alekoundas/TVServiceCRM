@@ -4,7 +4,6 @@ import Home from "./pages/home/Home.tsx";
 import CustomerForm from "./pages/customer/CustomerForm.tsx";
 import { ScrollPanel } from "primereact/scrollpanel";
 import { Route, Routes } from "react-router-dom";
-import React from "react";
 import Customers from "./pages/customer/Customers.tsx";
 import Tickets from "./pages/ticket/Tickets.tsx";
 

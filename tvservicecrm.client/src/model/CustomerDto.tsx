@@ -10,3 +10,14 @@ export class CustomerDto {
   contactInformations: ContactInformationDto[] = [];
   tickets: TicketDto[] = [];
 }
+
+export interface CustomerDto {
+  [key: string]: any;
+  id: number;
+  firstName: string;
+  lastName: string;
+  createdOn: Date;
+
+  contactInformations: ContactInformationDto[];
+  tickets: TicketDto[];
+}

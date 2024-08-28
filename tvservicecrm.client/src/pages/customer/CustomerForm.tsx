@@ -1,9 +1,9 @@
-import React, {  useState } from "react";
+import React, { useState } from "react";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import { useLocation, useNavigate } from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { CustomerDto } from "../../model/CustomerDto";
 import { ContactInformationTypesEnum } from "../../enum/ContactInformationTypesEnum";
 import { InputText } from "primereact/inputtext";
@@ -16,8 +16,8 @@ import { InputMask } from "primereact/inputmask";
 function CustomerForm() {
   //const navigate = useNavigate();
   const { state } = useLocation();
-    const formCustomer: CustomerDto = state["formCustomer"];
-    const formContactInformation = new ContactInformationDto();
+  const formCustomer: CustomerDto = state["formCustomer"];
+  const formContactInformation = new ContactInformationDto();
 
   const [customer, setCustomer] = useState(formCustomer);
   const [contactInformation, setContactInformation] = useState(
@@ -33,13 +33,16 @@ function CustomerForm() {
   //
   // Handle inpuut changes.
   //
-  const handleChange = (event) => {
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    // const name: StatusKey  = event.target.name as string;
     const name = event.target.name;
+
     const value = event.target.value;
     customer[name] = value;
     setCustomer({ ...customer });
   };
-  const handleContactInformationChange = (event) => {
+
+  const handleContactInformationChange = (event: any) => {
     const value = event.target.value;
     const name = event.target.name;
 
@@ -89,7 +92,7 @@ function CustomerForm() {
       ["contactInformationVisible"]: false,
     });
   };
-  const handleSubmit = (event) => {
+  const handleSubmit = (event: any) => {
     event.preventDefault();
 
     ApiService.create("customers", customer);

@@ -17,15 +17,19 @@ namespace TVServiceCRM.Server.DataAccess
         public DbSet<Ticket> Tickets { get; set; }
         public DbSet<Customer> Customers { get; set; }
         public DbSet<ContactInformation> ContactInformations { get; set; }
-        public DbSet<DataProtectionKey> DataProtectionKeys{ get; set; }
+        public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             base.OnConfiguring(optionsBuilder);
             ///Enable for ef update.
-            optionsBuilder.UseSqlServer("Server=localhost, 1433;Initial Catalog=TVServiceDB;Persist Security Info=False;User ID=sa;Password=P@ssw0rd;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;");
+            //optionsBuilder.UseSqlServer("Server=localhost, 1433;Initial Catalog=TVServiceDB;Persist Security Info=False;User ID=sa;Password=P@ssw0rd;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;");
 
             //optionsBuilder.UseSqlServer("Server=host.docker.internal, 1433;Initial Catalog=TVServiceDB;Persist Security Info=False;User ID=sa;Password=P@ssw0rd;MultipleActiveResultSets=False;Encrypt=True;TrustServerCertificate=True;Connection Timeout=30;");
+
+
+            //optionsBuilder.UseSqlite("Data Source=TVServiceCRM.db");
+            optionsBuilder.UseSqlite("Data Source=" + Directory.GetCurrentDirectory() + "/VolumeDB/TVServiceCRM.db");
 
             optionsBuilder.EnableSensitiveDataLogging();
             optionsBuilder.EnableDetailedErrors();
