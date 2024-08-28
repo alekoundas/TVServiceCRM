@@ -5,11 +5,12 @@
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
     <UserSecretsId>b3d96f23-a915-42c2-b074-f5fec3fcc960</UserSecretsId>
-    <DockerfileRunArguments>-p "8080:8080" -p "8081:8081" -v test1:/app/VolumeDB</DockerfileRunArguments> 
+    <!--<DockerfileRunArguments>-p "8080:8080" -p "8081:8081" -v test1:/app/VolumeDB</DockerfileRunArguments>--> 
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <SpaRoot>..\tvservicecrm.client</SpaRoot>
     <SpaProxyLaunchCommand>npm run dev</SpaProxyLaunchCommand>
     <SpaProxyServerUrl>https://localhost:5173</SpaProxyServerUrl>
+    <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
   </PropertyGroup>
 
   <ItemGroup>

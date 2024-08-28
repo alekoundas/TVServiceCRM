@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.EntityFrameworkCore;
 using TVServiceCRM.Server.Business.IServices;
 using TVServiceCRM.Server.Business.Services;
 using TVServiceCRM.Server.DataAccess;
@@ -82,5 +83,16 @@ app.MapIdentityApi<User>();
 
 
 app.MapFallbackToFile("/index.html");
+
+//using (var scope = app.Services.CreateScope())
+//{
+//    var services = scope.ServiceProvider;
+
+//    var context = services.GetRequiredService<ApiDbContext>();
+//    if (context.Database.GetPendingMigrations().Any())
+//    {
+//        context.Database.Migrate();
+//    }
+//}
 
 app.Run();
