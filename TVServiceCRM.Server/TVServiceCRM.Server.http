@@ -1,0 +1,6 @@
+@TVServiceCRM.Server_HostAddress = http://localhost:5233
+
+GET {{TVServiceCRM.Server_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
