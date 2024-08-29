@@ -8,7 +8,7 @@ services:
       - 8080:8080
       - 8081:8081
     volumes:
-      - test1:/app/VolumeDB
+      - volume-fra1-01:/app/VolumeDB
       - ~/.aspnet/https:/https:ro
 
     environment:
@@ -29,5 +29,5 @@ services:
   #         - web
 
 volumes:   # add this section
-  test1: 
+  volume-fra1-01: 
      external: true  
