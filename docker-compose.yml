@@ -8,7 +8,7 @@ services:
       - 8080:8080
       - 8081:8081
     volumes:
-      - volume-fra1-01:/app/VolumeDB
+      - /mnt/volume-fra1-01:/app/VolumeDB
       - ~/.aspnet/https:/https:ro
 
     environment:
