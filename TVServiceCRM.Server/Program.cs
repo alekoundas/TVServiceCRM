@@ -21,6 +21,7 @@ builder.Services.AddSwaggerGen();
 
 
 
+//builder.Services.AddLettuceEncrypt();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddDbContext<ApiDbContext>();
 builder.Services.AddSingleton(TimeProvider.System);

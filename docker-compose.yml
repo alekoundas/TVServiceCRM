@@ -1,6 +1,6 @@
 services:
   tvservicecrm.server:
-    image: ${DOCKER_REGISTRY-}tvservicecrmserver
+    image: alexpsychoson/tvservicecrmserver:latest
     build:
       context: .
       dockerfile: TVServiceCRM.Server/Dockerfile
@@ -9,6 +9,24 @@ services:
       - 8081:8081
     volumes:
       - test1:/app/VolumeDB
+      - ~/.aspnet/https:/https:ro
+
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      # - ASPNETCORE_Kestrel__Certificates__Default__Path=/home/app/.aspnet/https/TVServiceCRM.Server.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=P@ssw0rd
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+  # proxy:
+  #     build:
+  #         context:  ./nginx
+  #         dockerfile: Dockerfile
+  #     ports:
+  #         - "80:80"
+  #         - "443:443"
+  #     volumes:
+  #          - /etc/letsencrypt/:/etc/letsencrypt/
+  #     links:
+  #         - web
 
 volumes:   # add this section
   test1: 
