@@ -23,8 +23,8 @@ services:
       - ASPNETCORE_ENVIRONMENT=Production
       # - ASPNETCORE_URLS=https://*:8081
       # - ASPNETCORE_HTTPS_PORT=8081
-      - ASPNETCORE_Kestrel__Certificates__Default__Password=P@ssw0rd
-      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+      # - ASPNETCORE_Kestrel__Certificates__Default__Password=P@ssw0rd
+      # - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
 
 
   nginx:
@@ -45,7 +45,7 @@ services:
     volumes: 
       - ./certbot/conf:/etc/letsencrypt
       - ./certbot/www:/var/www/certbot
-    command: certonly --webroot -w /var/www/certbot --force-renewal --email psychoson_alex3@hotmail.com -d www.alexps.gr -d 165.227.245.10 -d 164.92.183.31 --agree-tos
+    command: certonly --webroot -w /var/www/certbot --force-renewal --email psychoson_alex3@hotmail.com -d www.alexps.gr -d alexps.gr --agree-tos
 
 
 
