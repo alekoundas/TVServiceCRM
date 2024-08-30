@@ -46,7 +46,7 @@ builder.Services.AddScoped<IDataService, DataService>();
 
 
 // Enable CORS.
-builder.Services.AddCors(c => c.AddPolicy("CorsPolicy", options => options.WithOrigins("*").AllowAnyMethod().AllowAnyHeader()));
+//builder.Services.AddCors(c => c.AddPolicy("CorsPolicy", options => options.WithOrigins("*").AllowAnyMethod().AllowAnyHeader()));
 
 
 // Add Identity.
@@ -81,7 +81,11 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapIdentityApi<User>();
-app.UseCors("CorsPolicy");
+//app.UseCors("CorsPolicy");
+app.UseCors(
+        options => options.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin()
+    ); 
+
 
 
 
