@@ -81,6 +81,8 @@ app.UseAuthorization();
 
 app.MapControllers();
 app.MapIdentityApi<User>();
+app.UseCors("CorsPolicy");
+
 
 
 app.MapFallbackToFile("/index.html");
