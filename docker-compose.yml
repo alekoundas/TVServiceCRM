@@ -14,7 +14,7 @@ services:
     volumes:
       - /mnt/tvsercivecrmvolume:/app/VolumeDB
       # - test1:/app/VolumeDB
-      - ~/.aspnet/https:/https:ro
+      # - ~/.aspnet/https:/https:ro
     restart: unless-stopped
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
@@ -33,7 +33,7 @@ services:
         - 443:443
     volumes:
         - ./TVServiceCRM.Server/nginx:/etc/nginx/nginx
-        - ./TVServiceCRM.Server/Certbot:/etc/letsencrypt
+        - ./TVServiceCRM.Server/Certbot/config:/etc/letsencrypt
         - ./TVServiceCRM.Server/Certbot/www:/var/www/certbot
     environment:
         - NGINX_HOST=alexps.gr
@@ -47,7 +47,7 @@ services:
   certbot:
     image: certbot/certbot
     volumes: 
-      - ./TVServiceCRM.Server/Certbot/conf:/etc/letsencrypt
+      - ./TVServiceCRM.Server/Certbot/config:/etc/letsencrypt
       - ./TVServiceCRM.Server/Certbot/www:/var/www/certbot
     # command: certonly --webroot -w /var/www/certbot --force-renewal --email psychoson_alex3@hotmail.com -d www.alexps.gr -d alexps.gr --agree-tos
     restart: unless-stopped

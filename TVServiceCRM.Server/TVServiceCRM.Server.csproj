@@ -39,4 +39,8 @@
     <ProjectReference Include="..\TVServiceCRM.Server.Business\TVServiceCRM.Server.Business.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="Certbot\www\" />
+  </ItemGroup>
+
 </Project>
