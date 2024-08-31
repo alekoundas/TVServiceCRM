@@ -13,44 +13,53 @@ services:
     expose:
       - 8080
       - 8081
-
     volumes:
-      - /mnt/tvsercivecrmvolume:/app/VolumeDB
-      # - test1:/app/VolumeDB
+      # - /mnt/tvsercivecrmvolume:/app/VolumeDB
+      - test1:/app/VolumeDB
       - ~/.aspnet/https:/https:ro
-
+    restart: unless-stopped
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       # - ASPNETCORE_URLS=https://*:8081
       # - ASPNETCORE_HTTPS_PORT=8081
-      - ASPNETCORE_Kestrel__Certificates__Default__Password=P@ssw0rd
-      - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
-
+      # - ASPNETCORE_Kestrel__Certificates__Default__Password=P@ssw0rd
+      # - ASPNETCORE_Kestrel__Certificates__Default__Path=/https/aspnetapp.pfx
+    networks:
+      - nginx-network
 
   nginx:
-    container_name: nginx
+    image: nginx:stable-alpine 
     restart: unless-stopped
-    image: nginx
     ports:
         - 80:80
         - 443:443
     volumes:
         - ./TVServiceCRM.Server/nginx.conf:/etc/nginx/nginx.conf
-        - ./certbot/conf:/etc/letsencrypt
-        - ./certbot/www:/var/www/certbot
-  
+        - ./TVServiceCRM.Server/Certbot:/etc/letsencrypt
+        - ./TVServiceCRM.Server/certbot/www:/var/www/certbot
+    environment:
+        - NGINX_HOST=alexps.gr
+    depends_on:
+        - tvservicecrm.server
+    networks:
+      - nginx-network
+
+
+
   certbot:
     image: certbot/certbot
-    container_name: certbot
     volumes: 
-      - ./certbot/conf:/etc/letsencrypt
-      - ./certbot/www:/var/www/certbot
-    command: certonly --webroot -w /var/www/certbot --force-renewal --email psychoson_alex3@hotmail.com -d www.alexps.gr -d alexps.gr --agree-tos
+      - ./TVServiceCRM.Server/certbot/conf:/etc/letsencrypt
+      - ./TVServiceCRM.Server/certbot/www:/var/www/certbot
+    # command: certonly --webroot -w /var/www/certbot --force-renewal --email psychoson_alex3@hotmail.com -d www.alexps.gr -d alexps.gr --agree-tos
+    restart: unless-stopped
 
 
-
+networks:
+  nginx-network:
+      driver: bridge
     
 
-# volumes: 
-#    test1: 
-#      external: true  
+volumes: 
+   test1: 
+     external: true  

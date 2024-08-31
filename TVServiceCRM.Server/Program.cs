@@ -52,7 +52,7 @@ builder.Services.AddScoped<IDataService, DataService>();
 
 // Add Identity.
 builder.Services.AddDataProtection().PersistKeysToDbContext<ApiDbContext>();
-builder.Services.AddAuthorization();
+//builder.Services.AddAuthorization();
 builder.Services.AddAuthentication().AddCookie(IdentityConstants.ApplicationScheme);
 builder.Services.AddIdentityCore<User>().AddEntityFrameworkStores<ApiDbContext>().AddApiEndpoints();
 
@@ -77,12 +77,12 @@ if (app.Environment.IsDevelopment())
 }
 
 //app.UseHttpsRedirection();
-//app.UseForwardedHeaders(new ForwardedHeadersOptions
-//{
-//    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-//});
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
 
-app.UseAuthorization();
+//app.UseAuthorization();
 
 app.MapControllers();
 app.MapIdentityApi<User>();
