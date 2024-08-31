@@ -51,10 +51,11 @@ builder.Services.AddScoped<IDataService, DataService>();
 
 
 // Add Identity.
-builder.Services.AddDataProtection().PersistKeysToDbContext<ApiDbContext>();
+//builder.Services.AddDataProtection().PersistKeysToDbContext<ApiDbContext>();
 //builder.Services.AddAuthorization();
-builder.Services.AddAuthentication().AddCookie(IdentityConstants.ApplicationScheme);
-builder.Services.AddIdentityCore<User>().AddEntityFrameworkStores<ApiDbContext>().AddApiEndpoints();
+builder.Services.AddAuthentication();
+    //.AddCookie(IdentityConstants.ApplicationScheme);
+//builder.Services.AddIdentityCore<User>().AddEntityFrameworkStores<ApiDbContext>().AddApiEndpoints();
 
 
 
@@ -85,7 +86,7 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 //app.UseAuthorization();
 
 app.MapControllers();
-app.MapIdentityApi<User>();
+//app.MapIdentityApi<User>();
 //app.UseCors("CorsPolicy");
 app.UseCors(
         options => options.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin()

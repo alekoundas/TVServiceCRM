@@ -1,7 +1,7 @@
 import { DataTableDto } from "../model/DataTableDto";
 
 export class ApiService {
-  static serverUrl = "https://localhost:8081/api/";
+  static serverUrl = "http://localhost:8080/api/";
   // static myInstance = null;
 
   // static getInstance() {
