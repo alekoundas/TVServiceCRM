@@ -14,8 +14,8 @@ services:
       - 8080
       - 8081
     volumes:
-      - /mnt/tvsercivecrmvolume:/app/VolumeDB
-      # - test1:/app/VolumeDB
+      # - /mnt/tvsercivecrmvolume:/app/VolumeDB
+      - test1:/app/VolumeDB
       - ~/.aspnet/https:/https:ro
     restart: unless-stopped
     environment:
@@ -60,6 +60,6 @@ networks:
       driver: bridge
     
 
-# volumes: 
-#    test1: 
-#      external: true  
+volumes: 
+   test1: 
+     external: true  
