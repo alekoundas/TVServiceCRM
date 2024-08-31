@@ -12,8 +12,8 @@ services:
     expose:
       - 8080
     volumes:
-      # - /mnt/tvsercivecrmvolume:/app/VolumeDB
-      - test1:/app/VolumeDB
+      - /mnt/tvsercivecrmvolume:/app/VolumeDB
+      # - test1:/app/VolumeDB
       - ~/.aspnet/https:/https:ro
     restart: unless-stopped
     environment:
