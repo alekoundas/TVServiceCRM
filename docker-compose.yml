@@ -34,7 +34,7 @@ services:
         - 80:80
         - 443:443
     volumes:
-        - ./TVServiceCRM.Server/nginx.conf:/etc/nginx/nginx.conf
+        - ./TVServiceCRM.Server/nginx:/etc/nginx/nginx
         - ./TVServiceCRM.Server/Certbot:/etc/letsencrypt
         - ./TVServiceCRM.Server/Certbot/www:/var/www/certbot
     environment:
