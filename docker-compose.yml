@@ -13,6 +13,7 @@ services:
       - 8080
     volumes:
       - /mnt/tvsercivecrmvolume:/app/VolumeDB
+      # - ./TVServiceCRM.Server/Certbot/www:/app/wwwroot
       # - test1:/app/VolumeDB
       # - ~/.aspnet/https:/https:ro
     restart: unless-stopped
@@ -32,12 +33,14 @@ services:
         - 80:80
         - 443:443
     volumes:
-        - ./TVServiceCRM.Server/nginx:/etc/nginx/nginx
-        - ./TVServiceCRM.Server/Certbot/config:/etc/letsencrypt
-        - ./TVServiceCRM.Server/Certbot/www:/var/www/certbot
+      - ./TVServiceCRM.Server/nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./TVServiceCRM.Server/Certbot/config:/etc/letsencrypt:ro
+      - ./TVServiceCRM.Server/Certbot/www:/usr/share/nginx/html/:ro
     environment:
         - NGINX_HOST=alexps.gr
     depends_on:
+        - tvservicecrm.server
+    links:
         - tvservicecrm.server
     networks:
       - nginx-network
@@ -47,8 +50,8 @@ services:
   certbot:
     image: certbot/certbot
     volumes: 
-      - ./TVServiceCRM.Server/Certbot/config:/etc/letsencrypt
-      - ./TVServiceCRM.Server/Certbot/www:/var/www/certbot
+      - ./TVServiceCRM.Server/Certbot/config:/etc/letsencrypt/:rw
+      - ./TVServiceCRM.Server/Certbot/www:/usr/share/nginx/html/:rw
     # command: certonly --webroot -w /var/www/certbot --force-renewal --email psychoson_alex3@hotmail.com -d www.alexps.gr -d alexps.gr --agree-tos
     restart: unless-stopped
 
