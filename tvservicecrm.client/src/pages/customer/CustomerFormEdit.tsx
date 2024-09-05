@@ -133,7 +133,7 @@ function CustomerFormEdit() {
       setTicketWaitAsync(false);
     };
 
-    if (!setTicketWaitAsync) {
+    if (!ticketWaitAsync) {
       refrshData();
     }
   }, [refreshTicketData]);
