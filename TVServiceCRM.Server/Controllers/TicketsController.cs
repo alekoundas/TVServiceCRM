@@ -3,7 +3,6 @@ using TVServiceCRM.Server.Model.Models;
 using TVServiceCRM.Server.Business.IServices;
 using System.Linq.Expressions;
 using TVServiceCRM.Server.Business;
-using TVServiceCRM.Server.Business.Services;
 using Microsoft.EntityFrameworkCore;
 using TVServiceCRM.Server.Model.Dtos.DataTable;
 
@@ -51,12 +50,12 @@ namespace TVServiceCRM.Server.Controllers
             }
 
 
-            // Handle Filtering of DataTable.
-            //if (dataTable.Filters?.FirstName?.Value != null && dataTable.Filters?.FirstName.Value.Length > 0)
-            //    filterQuery.Add(x => x.FirstName.Contains(dataTable.Filters.FirstName.Value));
+            //  Handle Filtering of DataTable.
+            //if (dataTable.Filters?.Id?.Value != null && dataTable.Filters?.Id.Value.Length > 0)
+            //    filterQuery.Add(x => x.Id.(dataTable.Filters.Id.Value));
 
-            //if (dataTable.Filters?.LastName?.Value != null && dataTable.Filters?.LastName.Value.Length > 0)
-            //    filterQuery.Add(x => x.LastName.Contains(dataTable.Filters.LastName.Value));
+            if (dataTable.Filters?.Description?.Value != null && dataTable.Filters?.Description.Value.Length > 0)
+                filterQuery.Add(x => x.Description.Contains(dataTable.Filters.Description.Value));
 
 
             // Retrieve Data.
@@ -73,7 +72,6 @@ namespace TVServiceCRM.Server.Controllers
             dataTable.Data = data;
             dataTable.PageCount = rows;
             return dataTable;
-
         }
 
 

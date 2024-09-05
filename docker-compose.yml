@@ -3,7 +3,7 @@ services:
 
   tvservicecrm.server:
     container_name: tvservicecrm.server
-    image: WebApi
+    image: ${DOCKER_REGISTRY-}webapi
     build:
       context: .
       dockerfile: TVServiceCRM.Server/Dockerfile

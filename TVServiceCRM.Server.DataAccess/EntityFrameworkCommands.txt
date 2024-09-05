@@ -3,7 +3,6 @@
 
 dotnet ef migrations script --project DataAccess
 
-dotnet ef migrations add InitialMigration --project DataAccess --verbose
  dotnet ef migrations add InitialMigration1 --project TVServiceCRM.Server.DataAccess --startup-project TVServiceCRM.Server
 
 dotnet ef database update --project TVServiceCRM.Server.DataAccess --startup-project TVServiceCRM.Server

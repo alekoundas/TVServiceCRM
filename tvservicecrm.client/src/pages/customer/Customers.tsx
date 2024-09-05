@@ -121,6 +121,7 @@ function Customers() {
           onChange={(e) => options.filterApplyCallback(e.value)}
           selectionMode="range"
           // readOnlyInput
+          className="w-full"
           hideOnRangeSelection
         />
       </div>
@@ -154,88 +155,89 @@ function Customers() {
     </React.Fragment>
   );
 
+  const renderHeader = () => {
+    return (
+      <div className="flex justify-content-between">
+        <div></div>
+        <Button
+          type="button"
+          icon="pi pi-plus"
+          label="Add"
+          outlined
+          onClick={() =>
+            navigate("/customers/add", { state: { formCustomer } })
+          }
+        />
+      </div>
+    );
+  };
+
   return (
     <>
       <div className="w-full card ">
         <Card title="Customers">
-          <div
-            className="flex align-items-center justify-content-center"
-            style={{ backgroundColor: "red" }}
+          <DataTable
+            value={dataTableDtoState.data}
+            // dataKey="id"
+            lazy
+            stripedRows
+            emptyMessage="No customers found."
+            tableStyle={{ minWidth: "50rem" }}
+            selectionMode="single"
+            loading={loading}
+            header={renderHeader}
+            // Pagging.
+            paginator
+            rows={dataTableDtoState.rows}
+            totalRecords={dataTableDtoState.pageCount}
+            onPage={onPage}
+            rowsPerPageOptions={[10, 25, 50, 100]}
+            // paginatorLeft={paginatorLeft}
+            currentPageReportTemplate={
+              "1 to " +
+              dataTableDtoState.rows +
+              " out of " +
+              dataTableDtoState.pageCount
+            }
+            paginatorTemplate="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink RowsPerPageDropdown"
+            // Filter.
+            filterDisplay="row"
+            filters={dataTableDtoState.filters}
+            onFilter={onFilter}
+            // Sort.
+            removableSort
+            sortMode="multiple"
+            onSort={onSort}
+            multiSortMeta={dataTableDtoState.multiSortMeta}
           >
-            <div className="flex absolute right-0 pr-7">
-              <Button
-                label="Add"
-                className="p-button-outlined mr-2"
-                icon="pi pi-user-plus"
-                onClick={() =>
-                  navigate("/customers/add", { state: { formCustomer } })
-                }
-              />
-            </div>
-          </div>
-
-          <div className="grid">
-            <DataTable
-              value={dataTableDtoState.data}
-              // dataKey="id"
-              lazy
-              stripedRows
-              emptyMessage="No customers found."
-              tableStyle={{ minWidth: "50rem" }}
-              selectionMode="single"
-              loading={loading}
-              // Pagging.
-              paginator
-              rows={dataTableDtoState.rows}
-              totalRecords={dataTableDtoState.pageCount}
-              onPage={onPage}
-              rowsPerPageOptions={[10, 25, 50, 100]}
-              // paginatorLeft={paginatorLeft}
-              currentPageReportTemplate={
-                "1 to " +
-                dataTableDtoState.rows +
-                " out of " +
-                dataTableDtoState.pageCount
-              }
-              paginatorTemplate="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink RowsPerPageDropdown"
-              // Filter.
-              filterDisplay="row"
-              filters={dataTableDtoState.filters}
-              onFilter={onFilter}
-              // Sort.
-              removableSort
-              sortMode="multiple"
-              onSort={onSort}
-              multiSortMeta={dataTableDtoState.multiSortMeta}
-            >
-              <Column
-                field="firstName"
-                header="First Name"
-                sortable
-                filter
-                filterPlaceholder="Search by First Name"
-              ></Column>
-              <Column
-                field="lastName"
-                header="Last Name"
-                sortable
-                filter
-                filterPlaceholder="Search by Last Name"
-              ></Column>
-              <Column
-                field="createdOn"
-                header="Creation Date"
-                filterElement={activityRowFilterTemplate}
-                sortable
-                filter
-                filterPlaceholder="Search by Creation Day"
-              ></Column>
-              <Column
-                headerStyle={{ width: "10%", minWidth: "8rem" }}
-                body={gridRowActions}
-              ></Column>
-            </DataTable>
-          </div>
+            <Column
+              field="firstName"
+              header="First Name"
+              sortable
+              filter
+              filterPlaceholder="Search by First Name"
+            ></Column>
+            <Column
+              field="lastName"
+              header="Last Name"
+              sortable
+              filter
+              filterPlaceholder="Search by Last Name"
+            ></Column>
+            <Column
+              field="createdOn"
+              header="Creation Date"
+              filterElement={activityRowFilterTemplate}
+              sortable
+              filter
+              filterPlaceholder="Search by Creation Day"
+            ></Column>
+            <Column
+              header="Actions"
+              headerStyle={{ width: "10%", minWidth: "8rem" }}
+              body={gridRowActions}
+            ></Column>
+          </DataTable>
         </Card>
       </div>
     </>

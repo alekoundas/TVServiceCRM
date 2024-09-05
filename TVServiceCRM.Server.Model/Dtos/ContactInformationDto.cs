@@ -5,7 +5,6 @@ namespace TVServiceCRM.Server.Model.Dtos
 {
     public class ContactInformationDto : BaseModel
     {
-
         public ContactInformationTypesEnum? Type { get; set; }
         public string? Value{ get; set; }
         public string? Description { get; set; }

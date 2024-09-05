@@ -34,7 +34,7 @@ namespace TVServiceCRM.Server.Controllers
             return result;
         }
 
-        // GET: api/Customers/GetDataTable
+        // POST: api/Customers/GetDataTable
         [HttpPost("GetDataTable")]
         public async Task<DataTableDto<CustomerDto>> GetDataTable([FromBody] DataTableDto<CustomerDto> dataTable)
         {
@@ -90,6 +90,7 @@ namespace TVServiceCRM.Server.Controllers
             List<CustomerDto> customerDto = _mapper.Map<List<CustomerDto>>(result);
 
             customerDto.SelectMany(x => x.ContactInformations).ToList().ForEach(x => x.Customer = null);
+            customerDto.SelectMany(x => x.Tickets).ToList().ForEach(x => x.Customer = null);
 
             int rows = await _dataService.Customers.CountAsyncFiltered(filterQuery);
 
@@ -108,7 +109,10 @@ namespace TVServiceCRM.Server.Controllers
             if (id == null)
                 return null;
 
-            Customer? customer = await _dataService.Customers.FirstOrDefaultAsync(m => m.Id == id);
+            Customer? customer = await _dataService.Query.Customers
+                .Include(x=>x.ContactInformations)
+                .Include(x=>x.Tickets)
+                .FirstOrDefaultAsync(m => m.Id == id);
 
             if (customer == null)
                 return null;
@@ -136,12 +140,28 @@ namespace TVServiceCRM.Server.Controllers
                     x.CreatedOn = DateTime.Now;
                 });
 
+            customer.Tickets
+              .Where(x => x.Id < 0)
+              .ToList()
+              .ForEach(x =>
+              {
+                  x.Id = 0;
+                  x.CreatedOn = DateTime.Now;
+              });
+
 
             _dataService.Customers.Add(customer);
             await _dataService.SaveChangesAsync();
 
             customerDto = _mapper.Map<CustomerDto>(customer);
-            customerDto.ContactInformations
+
+            if (customerDto.ContactInformations != null)
+                customerDto.ContactInformations
+                    .ToList()
+                    .ForEach(x => x.Customer = null);
+
+            if (customerDto.Tickets != null)
+                customerDto.Tickets
                 .ToList()
                 .ForEach(x => x.Customer = null);
 

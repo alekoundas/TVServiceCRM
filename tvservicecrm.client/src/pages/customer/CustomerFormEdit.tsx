@@ -1,7 +1,12 @@
 import React, { useEffect, useState } from "react";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
-import { DataTable } from "primereact/datatable";
+import {
+  DataTable,
+  DataTableFilterEvent,
+  DataTablePageEvent,
+  DataTableSortEvent,
+} from "primereact/datatable";
 import { Column } from "primereact/column";
 import { useNavigate, useParams } from "react-router-dom";
 import { CustomerDto } from "../../model/CustomerDto";
@@ -18,6 +23,7 @@ import { InputNumber } from "primereact/inputnumber";
 import { Editor, EditorTextChangeEvent } from "primereact/editor";
 import { TicketTypesEnum } from "../../enum/TicketTypesEnum";
 import { TicketStatusEnum } from "../../enum/TicketStatusEnum";
+import { DataTableDto } from "../../model/DataTableDto";
 
 enum FormType {
   Customer,
@@ -25,9 +31,12 @@ enum FormType {
   ContactInformation,
 }
 
-function CustomerForm() {
+function CustomerFormEdit() {
   const navigate = useNavigate();
   const params = useParams();
+  // const { state } = useLocation();
+
+  // const formCustomer: CustomerDto = state["formCustomer"];
   const formCustomer: CustomerDto = new CustomerDto();
   const formContactInformation = new ContactInformationDto();
   const formTicket = new TicketDto();
@@ -37,6 +46,51 @@ function CustomerForm() {
   const [contactInformation, setContactInformation] = useState(
     formContactInformation
   );
+  const [ticketLoading, setTicketLoading] = useState(true);
+  const [contactInformationLoading, setContactInformationLoading] =
+    useState(true);
+  const [ticketWaitAsync, setTicketWaitAsync] = useState(false);
+  const [contactInformationWaitAsync, setWontactInformationWaitAsync] =
+    useState(false);
+  const [refreshContactInformationData, setRefreshContactInformationData] =
+    useState(false);
+  const [refreshTicketData, setRefreshTicketData] = useState(false);
+  const [isInitialised, setIsInitialised] = useState(false);
+  const [ticketDataTableDto, setTicketDataTableDto] = useState<
+    DataTableDto<TicketDto>
+  >({
+    data: [],
+    first: 0,
+    rows: 10,
+    page: 1,
+    pageCount: 0,
+    multiSortMeta: [
+      { field: "id", order: 1 },
+      { field: "description", order: 1 },
+    ],
+    filters: {
+      id: { value: "", matchMode: "contains" },
+      description: { value: "", matchMode: "contains" },
+    },
+  });
+
+  const [contactInformationDataTableDto, setContactInformationDataTableDto] =
+    useState<DataTableDto<ContactInformationDto>>({
+      data: [],
+      first: 0,
+      rows: 10,
+      page: 1,
+      pageCount: 0,
+      multiSortMeta: [
+        { field: "value", order: 1 },
+        { field: "description", order: -1 },
+      ],
+      filters: {
+        value: { value: "", matchMode: "contains" },
+        description: { value: "", matchMode: "contains" },
+      },
+    });
+
   const [elementsVisibility, setElementsVisibility] = useState({
     contactInformationVisible: false,
     contactInformationDeleteVisible: false,
@@ -57,6 +111,58 @@ function CustomerForm() {
     }
     console.log("loaded");
   }, []);
+
+  useEffect(() => {
+    setTicketLoading(true);
+    setTicketWaitAsync(true);
+
+    if (!isInitialised) {
+      setIsInitialised(true);
+    }
+
+    const refrshData = async () => {
+      var response = await ApiService.getDataGrid<TicketDto>(
+        "tickets",
+        ticketDataTableDto
+      );
+
+      if (response) {
+        setTicketDataTableDto(response);
+      }
+      setTicketLoading(false);
+      setTicketWaitAsync(false);
+    };
+
+    if (!setTicketWaitAsync) {
+      refrshData();
+    }
+  }, [refreshTicketData]);
+
+  useEffect(() => {
+    setContactInformationLoading(true);
+    setWontactInformationWaitAsync(true);
+
+    if (!isInitialised) {
+      setIsInitialised(true);
+    }
+
+    const refrshData = async () => {
+      var response = await ApiService.getDataGrid<ContactInformationDto>(
+        "contactInformations",
+        contactInformationDataTableDto
+      );
+
+      if (response) {
+        setContactInformationDataTableDto(response);
+      }
+      setContactInformationLoading(false);
+      setWontactInformationWaitAsync(false);
+    };
+
+    if (!contactInformationWaitAsync) {
+      refrshData();
+    }
+  }, [refreshContactInformationData]);
 
   //
   // Handle input changes.
@@ -254,6 +360,56 @@ function CustomerForm() {
   };
 
   //
+  //  Handle Datatable
+  //
+  const onSort = (event: DataTableSortEvent, formType: FormType) => {
+    if (formType === FormType.Tickets) {
+      if (event.multiSortMeta)
+        ticketDataTableDto.multiSortMeta = event.multiSortMeta;
+
+      setTicketDataTableDto(ticketDataTableDto);
+      setRefreshTicketData(!refreshTicketData);
+    } else if (formType === FormType.ContactInformation) {
+      if (event.multiSortMeta)
+        contactInformationDataTableDto.multiSortMeta = event.multiSortMeta;
+
+      setContactInformationDataTableDto(contactInformationDataTableDto);
+      setRefreshContactInformationData(!refreshContactInformationData);
+    }
+  };
+
+  const onFilter = (event: DataTableFilterEvent, formType: FormType) => {
+    if (formType === FormType.Tickets) {
+      ticketDataTableDto.filters = event.filters;
+      setTicketDataTableDto(ticketDataTableDto);
+      setRefreshTicketData(!refreshTicketData);
+    } else if (formType === FormType.ContactInformation) {
+      contactInformationDataTableDto.filters = event.filters;
+      setContactInformationDataTableDto(contactInformationDataTableDto);
+      setRefreshContactInformationData(!refreshContactInformationData);
+    }
+  };
+
+  const onPage = (event: DataTablePageEvent, formType: FormType) => {
+    if (formType === FormType.Tickets) {
+      if (event.page) ticketDataTableDto.page = event.page;
+      if (event.pageCount) ticketDataTableDto.pageCount = event.pageCount;
+      if (event.rows) ticketDataTableDto.rows = event.rows;
+
+      setTicketDataTableDto(ticketDataTableDto);
+      setRefreshTicketData(!refreshTicketData);
+    } else if (formType === FormType.ContactInformation) {
+      if (event.page) contactInformationDataTableDto.page = event.page;
+      if (event.pageCount)
+        contactInformationDataTableDto.pageCount = event.pageCount;
+      if (event.rows) contactInformationDataTableDto.rows = event.rows;
+
+      setContactInformationDataTableDto(contactInformationDataTableDto);
+      setRefreshContactInformationData(!refreshContactInformationData);
+    }
+  };
+
+  //
   // Handle HTML templates
   //
   const renderHeader = (formType: FormType) => {
@@ -405,13 +561,37 @@ function CustomerForm() {
               className=""
             >
               <DataTable
-                value={customer.tickets}
-                stripedRows
-                editMode="row"
-                dataKey="id"
                 className="w-full"
-                scrollable
+                value={ticketDataTableDto.data}
+                lazy
+                stripedRows
+                emptyMessage="No tickets found."
                 tableStyle={{ minWidth: "50rem" }}
+                selectionMode="single"
+                loading={contactInformationLoading}
+                // Pagging.
+                paginator
+                rows={ticketDataTableDto.rows}
+                totalRecords={ticketDataTableDto.pageCount}
+                onPage={(e) => onPage(e, FormType.Tickets)}
+                rowsPerPageOptions={[10, 25, 50, 100]}
+                // paginatorLeft={paginatorLeft}
+                currentPageReportTemplate={
+                  "1 to " +
+                  ticketDataTableDto.rows +
+                  " out of " +
+                  ticketDataTableDto.pageCount
+                }
+                paginatorTemplate="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink RowsPerPageDropdown"
+                // Filter.
+                filterDisplay="row"
+                filters={ticketDataTableDto.filters}
+                onFilter={(e) => onFilter(e, FormType.Tickets)}
+                // Sort.
+                removableSort
+                sortMode="multiple"
+                onSort={(e) => onSort(e, FormType.Tickets)}
+                multiSortMeta={ticketDataTableDto.multiSortMeta}
                 header={renderHeader(FormType.Tickets)}
               >
                 <Column
@@ -448,12 +628,37 @@ function CustomerForm() {
               className=""
             >
               <DataTable
-                value={customer.contactInformations}
-                editMode="row"
-                dataKey="id"
                 className="w-full"
-                scrollable
+                value={contactInformationDataTableDto.data}
+                lazy
+                stripedRows
+                emptyMessage="No contact informations found."
                 tableStyle={{ minWidth: "50rem" }}
+                selectionMode="single"
+                loading={ticketLoading}
+                // Pagging.
+                paginator
+                rows={contactInformationDataTableDto.rows}
+                totalRecords={contactInformationDataTableDto.pageCount}
+                onPage={(e) => onPage(e, FormType.ContactInformation)}
+                rowsPerPageOptions={[10, 25, 50, 100]}
+                // paginatorLeft={paginatorLeft}
+                currentPageReportTemplate={
+                  "1 to " +
+                  contactInformationDataTableDto.rows +
+                  " out of " +
+                  contactInformationDataTableDto.pageCount
+                }
+                paginatorTemplate="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink RowsPerPageDropdown"
+                // Filter.
+                filterDisplay="row"
+                filters={contactInformationDataTableDto.filters}
+                onFilter={(e) => onFilter(e, FormType.ContactInformation)}
+                // Sort.
+                removableSort
+                sortMode="multiple"
+                onSort={(e) => onSort(e, FormType.ContactInformation)}
+                multiSortMeta={contactInformationDataTableDto.multiSortMeta}
                 header={renderHeader(FormType.ContactInformation)}
               >
                 <Column
@@ -649,4 +854,4 @@ function CustomerForm() {
   );
 }
 
-export default CustomerForm;
+export default CustomerFormEdit;

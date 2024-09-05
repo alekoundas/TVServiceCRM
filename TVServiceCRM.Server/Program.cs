@@ -1,33 +1,36 @@
-using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Text.Json.Serialization;
 using TVServiceCRM.Server.Business.IServices;
 using TVServiceCRM.Server.Business.Services;
 using TVServiceCRM.Server.DataAccess;
-using TVServiceCRM.Server.Model.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
+builder.Services.AddControllers().AddJsonOptions(x =>
+{
+    // Serialize enums as strings in api responses (e.g. Role).
+    x.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
 
-builder.Services.AddControllers();
+    // Ignore omitted parameters on models to enable optional params (e.g. User update).
+    x.JsonSerializerOptions.DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull;
+
+    // Ignore circular references.
+    x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles;
+}); 
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 
 
-
-
-
-
-//builder.Services.AddLettuceEncrypt();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddDbContext<ApiDbContext>();
 builder.Services.AddSingleton(TimeProvider.System);
 // Add services.
 builder.Services.AddScoped<IDataService, DataService>();
+builder.Services.ConfigureHttpJsonOptions(x => x.SerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
 
 
@@ -45,9 +48,6 @@ builder.Services.AddScoped<IDataService, DataService>();
 //        ValidationAlgorithm = ValidationAlgorithm.HMACSHA256
 //    });
 
-
-// Enable CORS.
-//builder.Services.AddCors(c => c.AddPolicy("CorsPolicy", options => options.WithOrigins("*").AllowAnyMethod().AllowAnyHeader()));
 
 
 // Add Identity.
@@ -75,9 +75,9 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
+    //app.UseHttpsRedirection();
 }
 
-//app.UseHttpsRedirection();
 app.UseForwardedHeaders(new ForwardedHeadersOptions
 {
     ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
@@ -97,15 +97,13 @@ app.UseCors(
 
 app.MapFallbackToFile("/index.html");
 
-//using (var scope = app.Services.CreateScope())
-//{
-//    var services = scope.ServiceProvider;
+using (var scope = app.Services.CreateScope())
+{
+    var services = scope.ServiceProvider;
+    var context = services.GetRequiredService<ApiDbContext>();
 
-//    var context = services.GetRequiredService<ApiDbContext>();
-//    if (context.Database.GetPendingMigrations().Any())
-//    {
-//        context.Database.Migrate();
-//    }
-//}
+    if (context.Database.GetPendingMigrations().Any())
+        context.Database.Migrate();
+}
 
 app.Run();

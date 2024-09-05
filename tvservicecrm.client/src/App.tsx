@@ -6,6 +6,7 @@ import { ScrollPanel } from "primereact/scrollpanel";
 import { Route, Routes } from "react-router-dom";
 import Customers from "./pages/customer/Customers.tsx";
 import Tickets from "./pages/ticket/Tickets.tsx";
+import CustomerFormEdit from "./pages/customer/CustomerFormEdit.tsx";
 
 function App() {
   return (
@@ -42,7 +43,7 @@ function App() {
                 />
                 <Route
                   path="/customers/:id/edit"
-                  element={<CustomerForm />}
+                  element={<CustomerFormEdit />}
                 />
                 <Route
                   path="/customers/:id/view"

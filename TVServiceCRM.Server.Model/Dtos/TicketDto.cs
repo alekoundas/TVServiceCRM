@@ -1,10 +1,13 @@
-﻿using TVServiceCRM.Server.Model.Models;
+﻿using TVServiceCRM.Server.Model.Enums;
+using TVServiceCRM.Server.Model.Models;
 
 namespace TVServiceCRM.Server.Model.Dtos
 {
     public class TicketDto: BaseModel
     {
-        public string? Title { get; set; }
+
+        public TicketStatusEnum? Status { get; set; }
+        public TicketTypesEnum? Type { get; set; }
         public string? Description { get; set; }
         public DateTime? CompletedOn { get; set; }
 

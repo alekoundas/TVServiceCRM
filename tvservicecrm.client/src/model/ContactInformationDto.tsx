@@ -8,8 +8,8 @@ export class ContactInformationDto {
   description: string = "";
   isFavorite: boolean = false;
 
-  customerId: number = 0;
-  customer?: CustomerDto;
+  customerId: number | null = null;
+  customer: CustomerDto | null = new CustomerDto();
 }
 
 export interface ContactInformationDto {
@@ -20,6 +20,6 @@ export interface ContactInformationDto {
   description: string;
   isFavorite: boolean;
 
-  customerId: number;
-  customer?: CustomerDto;
+  customerId: number | null;
+  customer: CustomerDto | null;
 }

@@ -2,6 +2,12 @@
 using Microsoft.EntityFrameworkCore;
 using TVServiceCRM.Server.Model.Models;
 using TVServiceCRM.Server.Business.IServices;
+using Microsoft.EntityFrameworkCore.Query;
+using System.Linq.Expressions;
+using TVServiceCRM.Server.Business;
+using TVServiceCRM.Server.Model.Dtos.DataTable;
+using TVServiceCRM.Server.Model.Dtos;
+using AutoMapper;
 
 namespace TVServiceCRM.Server.Controllers
 {
@@ -9,11 +15,13 @@ namespace TVServiceCRM.Server.Controllers
     [ApiController]
     public class ContactInformationsController : ControllerBase
     {
+        private readonly IMapper _mapper;
         private readonly IDataService _dataService;
         private readonly ILogger<TicketsController> _logger;
 
-        public ContactInformationsController(ILogger<TicketsController> logger, IDataService dataService)
+        public ContactInformationsController(ILogger<TicketsController> logger, IDataService dataService, IMapper mapper)
         {
+            _mapper = mapper;
             _logger = logger;
             _dataService = dataService;
         }
@@ -85,6 +93,66 @@ namespace TVServiceCRM.Server.Controllers
             await _dataService.SaveChangesAsync();
 
             return NoContent();
+        }
+
+
+        // POST: api/ContactInformations/GetDataTable
+        [HttpPost("GetDataTable")]
+        public async Task<DataTableDto<ContactInformationDto>> GetDataTable([FromBody] DataTableDto<ContactInformationDto> dataTable)
+        {
+            Func<IQueryable<ContactInformation>, IOrderedQueryable<ContactInformation>>? orderByQuery = null;
+            List<Func<IOrderedQueryable<ContactInformation>, IOrderedQueryable<ContactInformation>>>? thenOrderByQuery = new List<Func<IOrderedQueryable<ContactInformation>, IOrderedQueryable<ContactInformation>>>();
+            List<Expression<Func<ContactInformation, bool>>>? filterQuery = new List<Expression<Func<ContactInformation, bool>>>();
+            List<Func<IQueryable<ContactInformation>, IIncludableQueryable<ContactInformation, object>>>? includesQuery = new List<Func<IQueryable<ContactInformation>, IIncludableQueryable<ContactInformation, object>>>();
+
+
+            // Handle Sorting of DataTable.
+            if (dataTable.MultiSortMeta?.Count() > 0)
+            {
+                // Create the first OrderBy().
+                DataTableSortDto? dataTableSort = dataTable.MultiSortMeta.First();
+                if (dataTableSort.Order > 0)
+                    orderByQuery = x => x.OrderByColumn(dataTableSort.Field);
+                else if (dataTableSort.Order < 0)
+                    orderByQuery = x => x.OrderByColumnDescending(dataTableSort.Field);
+
+                // Create the rest OrderBy methods as ThenBy() if any.
+                foreach (var sortInfo in dataTable.MultiSortMeta.Skip(1))
+                {
+                    if (dataTableSort.Order > 0)
+                        thenOrderByQuery.Add(x => x.ThenByColumn(sortInfo.Field));
+                    else if (dataTableSort.Order < 0)
+                        thenOrderByQuery.Add(x => x.ThenByColumnDescending(sortInfo.Field));
+                }
+            }
+
+
+            // Handle Filtering of DataTable.
+            if (dataTable.Filters?.Value?.Value != null && dataTable.Filters?.Value.Value.Length > 0)
+                filterQuery.Add(x => x.Value.Contains(dataTable.Filters.Value.Value));
+
+            if (dataTable.Filters?.Description?.Value != null && dataTable.Filters?.Description.Value.Length > 0)
+                filterQuery.Add(x => x.Description.Contains(dataTable.Filters.Description.Value));
+
+
+
+            // Retrieve Data.
+            List<ContactInformation> result = await _dataService.ContactInformations.GetPaggingWithFilterAndSort(
+                filterQuery,
+                orderByQuery,
+                thenOrderByQuery,
+                includesQuery,
+                dataTable.PageCount.Value,
+                dataTable.Page.Value
+            );
+            List<ContactInformationDto> customerDto = _mapper.Map<List<ContactInformationDto>>(result);
+
+            int rows = await _dataService.ContactInformations.CountAsyncFiltered(filterQuery);
+
+            dataTable.Data = customerDto;
+            dataTable.PageCount = rows;
+            return dataTable;
+
         }
 
         private bool ContactInformationExists(int id)
