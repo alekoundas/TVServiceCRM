@@ -3,7 +3,7 @@ services:
 
   tvservicecrm.server:
     container_name: tvservicecrm.server
-    image: alexpsychoson/tvservicecrmserver:latest
+    image: WebApi
     build:
       context: .
       dockerfile: TVServiceCRM.Server/Dockerfile
@@ -14,7 +14,7 @@ services:
     volumes:
       - /mnt/tvsercivecrmvolume:/app/VolumeDB
       # - ./TVServiceCRM.Server/Certbot/www:/app/wwwroot
-      # - test1:/app/VolumeDB
+      - test1:/app/VolumeDB
       # - ~/.aspnet/https:/https:ro
     restart: unless-stopped
     environment:
