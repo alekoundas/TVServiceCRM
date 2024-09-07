@@ -8,6 +8,7 @@
         public DataTableFilterFieldDto? Value { get; set; }
         public DataTableFilterFieldDto? Id { get; set; }
         public DataTableFilterFieldDto? Description { get; set; }
+        public DataTableFilterFieldDto? CustomerId { get; set; }
 
     }
 }

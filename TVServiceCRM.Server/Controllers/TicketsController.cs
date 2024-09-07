@@ -51,8 +51,8 @@ namespace TVServiceCRM.Server.Controllers
 
 
             //  Handle Filtering of DataTable.
-            //if (dataTable.Filters?.Id?.Value != null && dataTable.Filters?.Id.Value.Length > 0)
-            //    filterQuery.Add(x => x.Id.(dataTable.Filters.Id.Value));
+            if (dataTable.Filters?.CustomerId?.Value != null && dataTable.Filters?.CustomerId.Value.Length > 0)
+                filterQuery.Add(x => x.CustomerId.ToString() == dataTable.Filters.CustomerId.Value);
 
             if (dataTable.Filters?.Description?.Value != null && dataTable.Filters?.Description.Value.Length > 0)
                 filterQuery.Add(x => x.Description.Contains(dataTable.Filters.Description.Value));
@@ -77,11 +77,10 @@ namespace TVServiceCRM.Server.Controllers
 
         // GET: api/Tickets
         [HttpGet]
-        //public async Task<ActionResult<IEnumerable<Ticket>>> GetTickets()
-        public string gettickets()
+        public async Task<ActionResult<IEnumerable<Ticket>>> GetTickets()
         {
-            //List<Ticket> result = await _dataService.Tickets.GetPaggingWithFilterAndSort(null, null, null);
-            return Directory.GetCurrentDirectory() + "/VolumeDB/TVServiceCRM.db";
+            List<Ticket> result = await _dataService.Tickets.GetPaggingWithFilterAndSort(null, null, null);
+            return result;
         }
 
         // GET: api/Tickets/5

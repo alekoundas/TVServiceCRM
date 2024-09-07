@@ -1,16 +1,23 @@
 import NavTop from "./components/nav_top/NavTop.tsx";
 import NavLeft from "./components/nav_left/NavLeft.tsx";
 import Home from "./pages/home/Home.tsx";
-import CustomerForm from "./pages/customer/CustomerForm.tsx";
 import { ScrollPanel } from "primereact/scrollpanel";
 import { Route, Routes } from "react-router-dom";
 import Customers from "./pages/customer/Customers.tsx";
 import Tickets from "./pages/ticket/Tickets.tsx";
-import CustomerFormEdit from "./pages/customer/CustomerFormEdit.tsx";
+import { Toast } from "primereact/toast";
+import { useRef } from "react";
+import { ToastService } from "./services/ToastService.tsx";
+import CustomerForm from "./pages/customer/CustomerForm.tsx";
 
-function App() {
+export default function App() {
+  // Set Toast messages here
+  const toast = useRef<Toast>(null);
+  ToastService.setToastRef(toast);
+
   return (
     <>
+      <Toast ref={toast} />
       <div className=" w-full ">
         <div className="flex flex-row pb-3">
           <div className="flex flex-column w-full">
@@ -43,7 +50,7 @@ function App() {
                 />
                 <Route
                   path="/customers/:id/edit"
-                  element={<CustomerFormEdit />}
+                  element={<CustomerForm />}
                 />
                 <Route
                   path="/customers/:id/view"
@@ -61,5 +68,3 @@ function App() {
     </>
   );
 }
-
-export default App;

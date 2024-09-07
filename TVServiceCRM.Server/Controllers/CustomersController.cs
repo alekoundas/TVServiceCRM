@@ -169,50 +169,53 @@ namespace TVServiceCRM.Server.Controllers
         }
 
 
-        //// POST: api/Customers/5
-        //[HttpPost]
-        //public async Task<Customer?> Edit(int id, Customer customer)
-        //{
-        //    if (id != customer.Id)
-        //        return null;
+        // PUT: api/Customers/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> PutCustomer(int id, Customer customer)
+        {
+            if (id != customer.Id)
+                return BadRequest();
 
-        //    try
-        //    {
-        //        _dataService.Customers.Update(customer);
-        //        await _dataService.SaveChangesAsync();
-        //    }
-        //    catch (DbUpdateConcurrencyException)
-        //    {
-        //        if (!CustomerExists(customer.Id))
-        //        {
-        //            return null;
-        //        }
-        //        else
-        //        {
-        //            throw;
-        //        }
-        //    }
+            _dataService.Tickets.Update(customer);
 
-        //    return customer;
-        //}
+            try
+            {
+                await _dataService.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!CustomerExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
 
+            return NoContent();
+        }
 
-        //// DELETE: api/Customers/5
-        ////[HttpDelete, ActionName("Delete")]        
-        //[HttpDelete]
-        //public async Task<Customer> Delete(int id)
-        //{
-        //    var customer = await _dataService.Customers.FindByIdAsync(id);
-        //    if (customer != null)
-        //        _dataService.Customers.Remove(customer);
+        // DELETE: api/Customers/5
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteCustomer(int id)
+        {
+            var customer = await _dataService.Customers.FindByIdAsync(id);
+            if (customer == null)
+            {
+                return NotFound();
+            }
 
-        //    await _dataService.SaveChangesAsync();
-        //    return customer;
-        //}
+            _dataService.Customers.Remove(customer);
+            await _dataService.SaveChangesAsync();
 
-        //private bool CustomerExists(int id)
-        //{
-        //    return _dataService.Customers.Any(e => e.Id == id);
-        //}
+            return NoContent();
+        }
+
+        private bool CustomerExists(int id)
+        {
+            return _dataService.Customers.Any(e => e.Id == id);
+        }
     }
 }

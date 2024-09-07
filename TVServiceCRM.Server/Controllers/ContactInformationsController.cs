@@ -134,6 +134,8 @@ namespace TVServiceCRM.Server.Controllers
             if (dataTable.Filters?.Description?.Value != null && dataTable.Filters?.Description.Value.Length > 0)
                 filterQuery.Add(x => x.Description.Contains(dataTable.Filters.Description.Value));
 
+            if (dataTable.Filters?.CustomerId?.Value != null && dataTable.Filters?.CustomerId.Value.Length > 0)
+                filterQuery.Add(x => x.CustomerId.ToString() == dataTable.Filters.CustomerId.Value);
 
 
             // Retrieve Data.

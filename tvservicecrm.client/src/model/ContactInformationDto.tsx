@@ -9,7 +9,7 @@ export class ContactInformationDto {
   isFavorite: boolean = false;
 
   customerId: number | null = null;
-  customer: CustomerDto | null = new CustomerDto();
+  customer: CustomerDto | null = null;
 }
 
 export interface ContactInformationDto {

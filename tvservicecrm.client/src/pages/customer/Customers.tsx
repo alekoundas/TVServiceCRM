@@ -3,26 +3,19 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import { Card } from "primereact/card";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
-import {
-  DataTable,
-  DataTableFilterEvent,
-  DataTablePageEvent,
-  DataTableSortEvent,
-} from "primereact/datatable";
-import { ApiService } from "../../services/ApiService";
+import { DataTable } from "primereact/datatable";
 import { CustomerDto } from "../../model/CustomerDto";
 import { DataTableDto } from "../../model/DataTableDto";
 import { Calendar } from "primereact/calendar";
+import DataTableService from "../../services/DataTableService";
 
 function Customers() {
   const navigate = useNavigate();
+  const defaultUrlSearchQuery =
+    "eyJkYXRhIjpbXSwicm93cyI6MTAsInBhZ2UiOjEsInBhZ2VDb3VudCI6MTEsIm11bHRpU29ydE1ldGEiOlt7ImZpZWxkIjoibGFzdE5hbWUiLCJvcmRlciI6MX0seyJmaWVsZCI6ImZpcnN0TmFtZSIsIm9yZGVyIjoxfSx7ImZpZWxkIjoiY3JlYXRlZE9uIiwib3JkZXIiOi0xfV0sImZpbHRlcnMiOnsiZmlyc3ROYW1lIjp7InZhbHVlIjoiIn0sImxhc3ROYW1lIjp7InZhbHVlIjoiIn0sImNyZWF0ZWRPbiI6eyJ2YWx1ZSI6IiJ9fX0=";
   const [UrlParameters, _setUrlParameters] = useSearchParams();
 
-  var formCustomer = new CustomerDto();
-  const [isInitialised, setIsInitialised] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [waitAsync, setWaitAsync] = useState(false);
-  const [refreshDataState, setRefreshDataState] = useState(false);
   const [dataTableDtoState, setDataTableDtoState] = useState<
     DataTableDto<CustomerDto>
   >({
@@ -42,76 +35,18 @@ function Customers() {
       createdOn: { value: "", matchMode: "contains" },
     },
   });
-
-  // const paginatorLeft = (
-  //   <Button
-  //     type="button"
-  //     icon="pi pi-refresh"
-  //     text
-  //   />
-  // );
+  const dataTableService = new DataTableService(
+    "customers",
+    dataTableDtoState,
+    setDataTableDtoState,
+    setLoading,
+    defaultUrlSearchQuery
+  );
 
   useEffect(() => {
-    setLoading(true);
-    setWaitAsync(true);
-
-    if (!isInitialised) {
-      var searchUrlParameter = UrlParameters.get("search");
-      if (searchUrlParameter) {
-        var searchQuery = JSON.parse(atob(searchUrlParameter));
-        setDataTableDtoState(searchQuery);
-      }
-      setIsInitialised(true);
-    }
-
-    const refrshData = async () => {
-      // Encode datatable filters and ordering to base 64
-      var searchQuery = btoa(JSON.stringify(dataTableDtoState));
-      window.history.replaceState(
-        null,
-        "New Page Title",
-        "/customers?search=" + searchQuery
-      );
-
-      var response = await ApiService.getDataGrid<CustomerDto>(
-        "customers",
-        dataTableDtoState
-      );
-
-      if (response) {
-        setDataTableDtoState(response);
-      }
-      setLoading(false);
-      setWaitAsync(false);
-    };
-
-    if (!waitAsync) {
-      refrshData();
-    }
-  }, [refreshDataState]);
-
-  const onPage = (event: DataTablePageEvent) => {
-    if (event.page) dataTableDtoState.page = event.page;
-    if (event.pageCount) dataTableDtoState.pageCount = event.pageCount;
-    if (event.rows) dataTableDtoState.rows = event.rows;
-
-    setDataTableDtoState(dataTableDtoState);
-    setRefreshDataState(!refreshDataState);
-  };
-
-  const onSort = (event: DataTableSortEvent) => {
-    if (event.multiSortMeta)
-      dataTableDtoState.multiSortMeta = event.multiSortMeta;
-
-    setDataTableDtoState(dataTableDtoState);
-    setRefreshDataState(!refreshDataState);
-  };
-
-  const onFilter = (event: DataTableFilterEvent) => {
-    dataTableDtoState.filters = event.filters;
-    setDataTableDtoState(dataTableDtoState);
-    setRefreshDataState(!refreshDataState);
-  };
+    var searchUrlParameter = UrlParameters.get("search");
+    dataTableService.loadData(searchUrlParameter);
+  }, []);
 
   const activityRowFilterTemplate = (options: any) => {
     return (
@@ -134,11 +69,7 @@ function Customers() {
         icon="pi pi-eye"
         rounded
         outlined
-        onClick={() =>
-          navigate("/customers/" + rowData.id + "/view", {
-            state: { formCustomer: rowData },
-          })
-        }
+        onClick={() => navigate("/customers/" + rowData.id + "/view")}
       />
       <Button
         icon="pi pi-pencil"
@@ -146,11 +77,7 @@ function Customers() {
         outlined
         className="mr-2"
         severity="info"
-        onClick={() =>
-          navigate("/customers/" + rowData.id + "/edit", {
-            state: { formCustomer: rowData },
-          })
-        }
+        onClick={() => navigate("/customers/" + rowData.id + "/edit")}
       />
     </React.Fragment>
   );
@@ -164,9 +91,7 @@ function Customers() {
           icon="pi pi-plus"
           label="Add"
           outlined
-          onClick={() =>
-            navigate("/customers/add", { state: { formCustomer } })
-          }
+          onClick={() => navigate("/customers/add")}
         />
       </div>
     );
@@ -178,7 +103,6 @@ function Customers() {
         <Card title="Customers">
           <DataTable
             value={dataTableDtoState.data}
-            // dataKey="id"
             lazy
             stripedRows
             emptyMessage="No customers found."
@@ -190,7 +114,7 @@ function Customers() {
             paginator
             rows={dataTableDtoState.rows}
             totalRecords={dataTableDtoState.pageCount}
-            onPage={onPage}
+            onPage={dataTableService.onPage}
             rowsPerPageOptions={[10, 25, 50, 100]}
             // paginatorLeft={paginatorLeft}
             currentPageReportTemplate={
@@ -203,11 +127,11 @@ function Customers() {
             // Filter.
             filterDisplay="row"
             filters={dataTableDtoState.filters}
-            onFilter={onFilter}
+            onFilter={dataTableService.onFilter}
             // Sort.
             removableSort
             sortMode="multiple"
-            onSort={onSort}
+            onSort={dataTableService.onSort}
             multiSortMeta={dataTableDtoState.multiSortMeta}
           >
             <Column
@@ -234,7 +158,7 @@ function Customers() {
             ></Column>
             <Column
               header="Actions"
-              headerStyle={{ width: "10%", minWidth: "8rem" }}
+              headerStyle={{ width: "20%", minWidth: "8rem" }}
               body={gridRowActions}
             ></Column>
           </DataTable>

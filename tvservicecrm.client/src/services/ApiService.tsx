@@ -1,8 +1,8 @@
 import { DataTableDto } from "../model/DataTableDto";
 
 export class ApiService {
-  static serverUrl = "https://alexps.gr/api/";
-  // static serverUrl = "http://localhost:8080/api/";
+  // static serverUrl = "https://alexps.gr/api/";
+  static serverUrl = "http://localhost:8080/api/";
 
   static async get<TEntity>(
     controller: string,
@@ -75,10 +75,13 @@ export class ApiService {
 
   static async update<TEntity>(
     controller: string,
-    data: TEntity
+    data: TEntity,
+    id: number
   ): Promise<TEntity | null> {
     try {
-      const response = await fetch(this.serverUrl + controller, {
+      const url = this.serverUrl + controller + "/" + id;
+
+      const response = await fetch(url, {
         method: "PUT",
         body: JSON.stringify(data),
         headers: {

@@ -1,9 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { ReactNode, useEffect, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { useNavigate, useParams } from "react-router-dom";
+import { Column, ColumnBodyOptions } from "primereact/column";
+import { Form, useLocation, useNavigate, useParams } from "react-router-dom";
 import { CustomerDto } from "../../model/CustomerDto";
 import { ContactInformationTypesEnum } from "../../enum/ContactInformationTypesEnum";
 import { InputText } from "primereact/inputtext";
@@ -18,25 +18,99 @@ import { InputNumber } from "primereact/inputnumber";
 import { Editor, EditorTextChangeEvent } from "primereact/editor";
 import { TicketTypesEnum } from "../../enum/TicketTypesEnum";
 import { TicketStatusEnum } from "../../enum/TicketStatusEnum";
+import { DataTableDto } from "../../model/DataTableDto";
+import DataTableService from "../../services/DataTableService";
+import { Toast } from "primereact/toast";
+import { ToastService } from "../../services/ToastService";
 
 enum FormType {
   Customer,
   Tickets,
   ContactInformation,
 }
+enum FormMode {
+  ADD = "ADD",
+  VIEW = "VIEW",
+  EDIT = "EDIT",
+}
 
-function CustomerForm() {
+interface DynamicColumns {
+  field: string;
+  header: string;
+  sortable: boolean;
+  filter: boolean;
+  filterPlaceholder: string;
+  style: React.CSSProperties;
+  body: any | null;
+}
+
+export default function CustomerForm() {
   const navigate = useNavigate();
   const params = useParams();
-  const formCustomer: CustomerDto = new CustomerDto();
-  const formContactInformation = new ContactInformationDto();
-  const formTicket = new TicketDto();
+  const location = useLocation();
 
-  const [customer, setCustomer] = useState(formCustomer);
-  const [ticket, setTicket] = useState(formTicket);
+  const formMode: FormMode = window.location.href.endsWith("/add")
+    ? FormMode.ADD
+    : window.location.href.endsWith("/edit")
+    ? FormMode.EDIT
+    : FormMode.VIEW;
+
+  const [customer, setCustomer] = useState(new CustomerDto());
+  const [ticket, setTicket] = useState(new TicketDto());
+  const [ticketLoading, setTicketLoading] = useState(true);
   const [contactInformation, setContactInformation] = useState(
-    formContactInformation
+    new ContactInformationDto()
   );
+  const [contactInformationLoading, setContactInformationLoading] =
+    useState(true);
+  const [ticketDataTableDto, setTicketDataTableDto] = useState<
+    DataTableDto<TicketDto>
+  >({
+    data: [],
+    first: 0,
+    rows: 10,
+    page: 1,
+    pageCount: 0,
+    multiSortMeta: [{ field: "id", order: -1 }],
+    filters: {
+      id: { value: "", matchMode: "contains" },
+      description: { value: "", matchMode: "contains" },
+      completedOn: { value: "", matchMode: "contains" },
+      customerId: { value: "", matchMode: "contains" },
+    },
+  });
+
+  const [contactInformationDataTableDto, setContactInformationDataTableDto] =
+    useState<DataTableDto<ContactInformationDto>>({
+      data: [],
+      first: 0,
+      rows: 10,
+      page: 1,
+      pageCount: 0,
+      multiSortMeta: [],
+      filters: {
+        value: { value: "", matchMode: "contains" },
+        description: { value: "", matchMode: "contains" },
+        customerId: { value: "", matchMode: "contains" },
+      },
+    });
+
+  const ticketDataTableService = new DataTableService(
+    "tickets",
+    ticketDataTableDto,
+    setTicketDataTableDto,
+    setTicketLoading,
+    null
+  );
+
+  const contactInformationDataTableService = new DataTableService(
+    "contactInformations",
+    contactInformationDataTableDto,
+    setContactInformationDataTableDto,
+    setContactInformationLoading,
+    null
+  );
+
   const [elementsVisibility, setElementsVisibility] = useState({
     contactInformationVisible: false,
     contactInformationDeleteVisible: false,
@@ -46,7 +120,7 @@ function CustomerForm() {
   });
 
   //
-  //  Load initial data
+  //  Load initial data on load and everytime url changes
   //
   useEffect(() => {
     if (params["id"]) {
@@ -54,9 +128,25 @@ function CustomerForm() {
       ApiService.get<CustomerDto>("customers", id).then((result) => {
         if (result) setCustomer(result);
       });
+
+      // Add filter on parent Id (CustomerId)
+      ticketDataTableDto.filters.customerId = {
+        value: id,
+        matchMode: "contains",
+      };
+      contactInformationDataTableDto.filters.customerId = {
+        value: id,
+        matchMode: "contains",
+      };
+      ticketDataTableService.loadData(null);
+      contactInformationDataTableService.loadData(null);
+    } else {
+      setTicketLoading(false);
+      setContactInformationLoading(false);
     }
+
     console.log("loaded");
-  }, []);
+  }, [location]);
 
   //
   // Handle input changes.
@@ -109,10 +199,18 @@ function CustomerForm() {
   //
   // Handle save.
   //
+
   const handleContactInformationSave = () => {
     // Edit mode.
     if (contactInformation.id > 0) {
-      return;
+      ApiService.update(
+        "contactinformations",
+        contactInformation,
+        contactInformation.id
+      ).then(() => {
+        ToastService.showSuccess();
+        contactInformationDataTableService.loadData(null);
+      });
     }
 
     // Add mode.
@@ -128,8 +226,8 @@ function CustomerForm() {
         contactInformation.id = -1;
       }
 
-      customer.contactInformations.push(contactInformation);
-      setCustomer({ ...customer });
+      contactInformationDataTableDto.data.push(contactInformation);
+      setContactInformationDataTableDto({ ...contactInformationDataTableDto });
     }
 
     // Add mode edit from grid row action.
@@ -147,7 +245,10 @@ function CustomerForm() {
   const handleTicketSave = () => {
     // Edit mode.
     if (ticket.id > 0) {
-      return;
+      ApiService.update("tickets", ticket, ticket.id).then(() => {
+        ToastService.showSuccess();
+        ticketDataTableService.loadData(null);
+      });
     }
 
     // Add mode.
@@ -163,8 +264,8 @@ function CustomerForm() {
         ticket.id = -1;
       }
 
-      customer.tickets.push(ticket);
-      setCustomer({ ...customer });
+      ticketDataTableDto.data.push(ticket);
+      setTicketDataTableDto({ ...ticketDataTableDto });
     }
     // Add mode edit from grid row action.
     else if (ticket.id < 0) {
@@ -180,9 +281,13 @@ function CustomerForm() {
     event.preventDefault();
 
     if (customer.id > 0) {
-      ApiService.update("customers", customer);
+      ApiService.update("customers", customer, customer.id);
     } else {
+      customer.tickets = ticketDataTableDto.data;
+      customer.contactInformations = contactInformationDataTableDto.data;
+
       ApiService.create("customers", customer).then((x) => {
+        ToastService.showSuccess();
         navigate("/customers/" + x?.id + "/view");
       });
     }
@@ -191,7 +296,6 @@ function CustomerForm() {
   //
   // Handle grid row actions.
   //
-
   const handleEditContactInformation = (rowData: ContactInformationDto) => {
     setContactInformation({ ...rowData });
 
@@ -303,7 +407,10 @@ function CustomerForm() {
     </React.Fragment>
   );
 
-  const contactInformationGridRowActions = (rowData: ContactInformationDto) => (
+  const contactInformationGridRowActions = (
+    rowData: ContactInformationDto,
+    _options: ColumnBodyOptions
+  ) => (
     <React.Fragment>
       <Button
         icon="pi pi-pencil"
@@ -340,6 +447,84 @@ function CustomerForm() {
       />
     </React.Fragment>
   );
+
+  const contactInformationDataTableColumns: DynamicColumns[] = [
+    {
+      field: "type",
+      header: "Type",
+      sortable: formMode !== FormMode.ADD,
+      filter: formMode !== FormMode.ADD,
+      filterPlaceholder: "Search",
+      style: { width: "10%" },
+      body: null,
+    },
+    {
+      field: "value",
+      header: "Value",
+      sortable: formMode !== FormMode.ADD,
+      filter: formMode !== FormMode.ADD,
+      filterPlaceholder: "Search",
+      style: { width: "20%" },
+      body: null,
+    },
+    {
+      field: "description",
+      header: "Description",
+      sortable: formMode !== FormMode.ADD,
+      filter: formMode !== FormMode.ADD,
+      filterPlaceholder: "Search",
+      style: { width: "20%" },
+      body: null,
+    },
+    {
+      field: "",
+      header: "Actions",
+      sortable: false,
+      filter: false,
+      filterPlaceholder: "Search",
+      style: { width: "20%" },
+      body: contactInformationGridRowActions,
+    },
+  ];
+
+  const ticketDataTableColumns: DynamicColumns[] = [
+    {
+      field: "id",
+      header: "Id",
+      sortable: formMode !== FormMode.ADD,
+      filter: formMode !== FormMode.ADD,
+      filterPlaceholder: "Search",
+      style: { width: "10%" },
+      body: "",
+    },
+    {
+      field: "description",
+      header: "Description",
+      sortable: formMode !== FormMode.ADD,
+      filter: formMode !== FormMode.ADD,
+      filterPlaceholder: "Search",
+      style: { width: "20%" },
+      body: "",
+    },
+    {
+      field: "completedOn",
+      header: "Completed On",
+      sortable: formMode !== FormMode.ADD,
+      filter: formMode !== FormMode.ADD,
+      filterPlaceholder: "Search",
+      style: { width: "20%" },
+      body: "",
+    },
+    {
+      field: "",
+      header: "Actions",
+      sortable: false,
+      filter: false,
+      filterPlaceholder: "Search",
+      style: { width: "20%" },
+      body: ticketGridRowActions,
+    },
+  ];
 
   return (
     <>
@@ -405,39 +590,51 @@ function CustomerForm() {
               className=""
             >
               <DataTable
-                value={customer.tickets}
-                stripedRows
-                editMode="row"
-                dataKey="id"
                 className="w-full"
-                scrollable
+                value={ticketDataTableDto.data}
+                lazy
+                stripedRows
+                emptyMessage="No tickets found."
                 tableStyle={{ minWidth: "50rem" }}
+                selectionMode="single"
+                loading={ticketLoading}
+                // Pagging.
+                paginator
+                rows={ticketDataTableDto.rows}
+                totalRecords={ticketDataTableDto.pageCount}
+                onPage={ticketDataTableService.onPage}
+                rowsPerPageOptions={[10, 25, 50, 100]}
+                // paginatorLeft={paginatorLeft}
+                currentPageReportTemplate={
+                  "1 to " +
+                  ticketDataTableDto.rows +
+                  " out of " +
+                  ticketDataTableDto.pageCount
+                }
+                paginatorTemplate="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink RowsPerPageDropdown"
+                // Filter.
+                filterDisplay="row"
+                filters={ticketDataTableDto.filters}
+                onFilter={ticketDataTableService.onFilter}
+                // Sort.
+                removableSort
+                sortMode="multiple"
+                onSort={ticketDataTableService.onSort}
+                multiSortMeta={ticketDataTableDto.multiSortMeta}
                 header={renderHeader(FormType.Tickets)}
               >
-                <Column
-                  field="id"
-                  header="Id"
-                  style={{ width: "20%" }}
-                ></Column>
-                <Column
-                  field="title"
-                  header="Ttile"
-                  style={{ width: "20%" }}
-                ></Column>
-                <Column
-                  field="description"
-                  header="Description"
-                  style={{ width: "40%" }}
-                ></Column>
-                <Column
-                  field="completedOn"
-                  header="Completed On"
-                  style={{ width: "5%" }}
-                ></Column>
-                <Column
-                  headerStyle={{ width: "10%", minWidth: "8rem" }}
-                  body={ticketGridRowActions}
-                ></Column>
+                {ticketDataTableColumns.map((col, i) => (
+                  <Column
+                    key={col.field}
+                    field={col.field}
+                    header={col.header}
+                    sortable={col.sortable}
+                    filter={col.filter}
+                    filterPlaceholder={col.filterPlaceholder}
+                    style={col.style}
+                    body={col.body}
+                  ></Column>
+                ))}
               </DataTable>
             </Card>
           </div>
@@ -448,33 +645,51 @@ function CustomerForm() {
               className=""
             >
               <DataTable
-                value={customer.contactInformations}
-                editMode="row"
-                dataKey="id"
                 className="w-full"
-                scrollable
+                value={contactInformationDataTableDto.data}
+                lazy
+                stripedRows
+                emptyMessage="No contact informations found."
                 tableStyle={{ minWidth: "50rem" }}
+                selectionMode="single"
+                loading={contactInformationLoading}
+                // Pagging.
+                paginator
+                rows={contactInformationDataTableDto.rows}
+                totalRecords={contactInformationDataTableDto.pageCount}
+                onPage={contactInformationDataTableService.onPage}
+                rowsPerPageOptions={[10, 25, 50, 100]}
+                // paginatorLeft={paginatorLeft}
+                currentPageReportTemplate={
+                  "1 to " +
+                  contactInformationDataTableDto.rows +
+                  " out of " +
+                  contactInformationDataTableDto.pageCount
+                }
+                paginatorTemplate="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink RowsPerPageDropdown"
+                // Filter.
+                filterDisplay="row"
+                filters={contactInformationDataTableDto.filters}
+                onFilter={contactInformationDataTableService.onFilter}
+                // Sort.
+                removableSort
+                sortMode="multiple"
+                onSort={contactInformationDataTableService.onSort}
+                multiSortMeta={contactInformationDataTableDto.multiSortMeta}
                 header={renderHeader(FormType.ContactInformation)}
               >
-                <Column
-                  field="type"
-                  header="Type"
-                  style={{ width: "20%" }}
-                ></Column>
-                <Column
-                  field="value"
-                  header="Value"
-                  style={{ width: "40%" }}
-                ></Column>
-                <Column
-                  field="description"
-                  header="Description"
-                  style={{ width: "5%" }}
-                ></Column>
-                <Column
-                  headerStyle={{ width: "10%", minWidth: "8rem" }}
-                  body={contactInformationGridRowActions}
-                ></Column>
+                {contactInformationDataTableColumns.map((col, i) => (
+                  <Column
+                    key={col.field}
+                    field={col.field}
+                    header={col.header}
+                    sortable={col.sortable}
+                    filter={col.filter}
+                    filterPlaceholder={col.filterPlaceholder}
+                    style={col.style}
+                    body={col.body}
+                  ></Column>
+                ))}
               </DataTable>
             </Card>
           </div>
@@ -648,5 +863,3 @@ function CustomerForm() {
     </>
   );
 }
-
-export default CustomerForm;
