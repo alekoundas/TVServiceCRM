@@ -64,13 +64,13 @@ namespace TVServiceCRM.Server.Business.Repository
             _set.AddRange(entities);
         }
 
-        public void Update<TEntity>(TEntity model)
+        public void Update(TEntity model)
         {
             if (model != null)
                 Context.Entry(model).State = EntityState.Modified;
         }
 
-        public void UpdateRange<TEntity>(List<TEntity> models)
+        public void UpdateRange(List<TEntity> models)
         {
             foreach (var model in models)
                 if (model != null)

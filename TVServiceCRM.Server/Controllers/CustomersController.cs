@@ -176,7 +176,7 @@ namespace TVServiceCRM.Server.Controllers
             if (id != customer.Id)
                 return BadRequest();
 
-            _dataService.Tickets.Update(customer);
+            _dataService.Customers.Update(customer);
 
             try
             {

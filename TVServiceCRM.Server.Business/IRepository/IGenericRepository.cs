@@ -17,8 +17,8 @@ namespace TVServiceCRM.Server.Business.IRepository
         // CRUD operations.
         void Add(TEntity entity);
         void AddRange(IEnumerable<TEntity> entities);
-        void Update<TEntity>(TEntity model);
-        void UpdateRange<TEntity>(List<TEntity> models);
+        void Update(TEntity model);
+        void UpdateRange(List<TEntity> models);
         void Remove(TEntity entity);
         void RemoveRange(IEnumerable<TEntity> entities);
 

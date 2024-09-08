@@ -4,6 +4,7 @@ export interface UserLoginRequestDto {
 }
 
 export class UserLoginRequestDto {
+  [key: string]: any;
   email: string = "";
   password: string = "";
 }

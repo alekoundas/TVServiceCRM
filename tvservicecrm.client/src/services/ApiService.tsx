@@ -2,10 +2,10 @@ import { DataTableDto } from "../model/DataTableDto";
 import { UserLoginRequestDto } from "../model/UserLoginRequestDto";
 import { UserLoginResponseDto } from "../model/UserLoginResponseDto";
 import { ToastService } from "./ToastService";
-import Cookies from "js-cookie";
+
 export class ApiService {
-  // static serverUrl = "https://alexps.gr/api/";
-  static serverUrl = "http://localhost:8080/api/";
+  static serverUrl = "https://alexps.gr/api/";
+  // static serverUrl = "http://localhost:8080/api/";
 
   static async get<TEntity>(
     controller: string,
@@ -104,6 +104,8 @@ export class ApiService {
   static async login(
     data: UserLoginRequestDto
   ): Promise<UserLoginResponseDto | null> {
+    // const jwt = require("jsonwebtoken");
+
     try {
       const url = this.serverUrl + "users/login";
 
@@ -116,7 +118,6 @@ export class ApiService {
       });
 
       const responseJson = await response.json();
-      Cookies.set("token", token, { expires: 7, secure: true });
       return responseJson;
     } catch (error) {
       ToastService.showError("asdasd");
