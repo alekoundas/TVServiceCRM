@@ -1,4 +1,5 @@
 import { DataTableDto } from "../model/DataTableDto";
+import { ToastService } from "./ToastService";
 
 export class ApiService {
   // static serverUrl = "https://alexps.gr/api/";
@@ -95,6 +96,28 @@ export class ApiService {
     } catch (error) {
       return null;
       console.error(error);
+    }
+  }
+
+  static async login<TEntity>(data: TEntity): Promise<TEntity | null> {
+    try {
+      const url = this.serverUrl + "users/login";
+
+      const response = await fetch(url, {
+        method: "POST",
+        body: JSON.stringify(data),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const responseJson = await response.json();
+
+      return responseJson;
+    } catch (error) {
+      ToastService.showError("asdasd");
+      console.error(error);
+      return null;
     }
   }
 }

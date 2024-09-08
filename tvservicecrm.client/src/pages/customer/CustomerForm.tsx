@@ -1,9 +1,9 @@
-import React, { ReactNode, useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "primereact/button";
 import { Card } from "primereact/card";
 import { DataTable } from "primereact/datatable";
 import { Column, ColumnBodyOptions } from "primereact/column";
-import { Form, useLocation, useNavigate, useParams } from "react-router-dom";
+import { useLocation, useNavigate, useParams } from "react-router-dom";
 import { CustomerDto } from "../../model/CustomerDto";
 import { ContactInformationTypesEnum } from "../../enum/ContactInformationTypesEnum";
 import { InputText } from "primereact/inputtext";
@@ -20,7 +20,6 @@ import { TicketTypesEnum } from "../../enum/TicketTypesEnum";
 import { TicketStatusEnum } from "../../enum/TicketStatusEnum";
 import { DataTableDto } from "../../model/DataTableDto";
 import DataTableService from "../../services/DataTableService";
-import { Toast } from "primereact/toast";
 import { ToastService } from "../../services/ToastService";
 
 enum FormType {
@@ -623,7 +622,7 @@ export default function CustomerForm() {
                 multiSortMeta={ticketDataTableDto.multiSortMeta}
                 header={renderHeader(FormType.Tickets)}
               >
-                {ticketDataTableColumns.map((col, i) => (
+                {ticketDataTableColumns.map((col, _i) => (
                   <Column
                     key={col.field}
                     field={col.field}
@@ -678,7 +677,7 @@ export default function CustomerForm() {
                 multiSortMeta={contactInformationDataTableDto.multiSortMeta}
                 header={renderHeader(FormType.ContactInformation)}
               >
-                {contactInformationDataTableColumns.map((col, i) => (
+                {contactInformationDataTableColumns.map((col, _i) => (
                   <Column
                     key={col.field}
                     field={col.field}

@@ -8,11 +8,56 @@ export namespace ToastService {
     toastRef = toastRefValue;
   }
 
-  export function asdas() {
+  export function showSuccess() {
     toastRef.current?.show({
       severity: "success",
       summary: "Success",
       detail: "Update was successfull.",
+    });
+  }
+
+  export function showInfo() {
+    toastRef.current?.show({
+      severity: "info",
+      summary: "Info",
+      detail: "Message Content",
+      life: 3000,
+    });
+  }
+
+  export function showWarn() {
+    toastRef.current?.show({
+      severity: "warn",
+      summary: "Warning",
+      detail: "Message Content",
+      life: 3000,
+    });
+  }
+
+  export function showError(message: string) {
+    toastRef.current?.show({
+      severity: "error",
+      summary: "Error",
+      detail: message,
+      life: 3000,
+    });
+  }
+
+  export function showSecondary() {
+    toastRef.current?.show({
+      severity: "secondary",
+      summary: "Secondary",
+      detail: "Message Content",
+      life: 3000,
+    });
+  }
+
+  export function showContrast() {
+    toastRef.current?.show({
+      severity: "contrast",
+      summary: "Contrast",
+      detail: "Message Content",
+      life: 3000,
     });
   }
 }

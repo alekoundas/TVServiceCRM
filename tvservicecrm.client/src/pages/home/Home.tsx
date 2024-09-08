@@ -1,5 +1,5 @@
 function Home() {
-  return <>kekw</>;
+  return <></>;
 }
 
 export default Home;

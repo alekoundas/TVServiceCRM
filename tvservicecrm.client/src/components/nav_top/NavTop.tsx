@@ -1,11 +1,17 @@
 import { Menubar } from "primereact/menubar";
-import { InputText } from "primereact/inputtext";
 import { Badge } from "primereact/badge";
-import { Avatar } from "primereact/avatar";
 import { useNavigate } from "react-router-dom";
+import { Menu } from "primereact/menu";
+import { Button } from "primereact/button";
+import { MenuItem } from "primereact/menuitem";
+import React, { useRef, useState } from "react";
+import { Sidebar } from "primereact/sidebar";
+import { ThemeService } from "../../services/ThemeService";
+import { Image } from "primereact/image";
 
 function NavTop() {
   const navigate = useNavigate();
+  const menuRight = useRef<Menu>(null);
 
   const itemRenderer = (item: any) => (
     <a className="flex align-items-center p-menuitem-link">
@@ -97,29 +103,117 @@ function NavTop() {
       className="mr-2"
     ></img>
   );
+
+  // const dialogFooter = () => (
+  //   <React.Fragment>
+  //     <Button
+  //       label="Cancel"
+  //       icon="pi pi-times"
+  //       outlined
+  //     />
+  //   </React.Fragment>
+  // );
+
+  const itemsSettings: MenuItem[] = [
+    {
+      label: "Options",
+      items: [
+        {
+          label: "Login",
+          icon: "pi pi-user",
+          command: () => {
+            navigate("/user/login");
+          },
+        },
+        {
+          label: "Theme",
+          icon: "pi pi-palette",
+          command: () => {
+            setVisible(true);
+          },
+        },
+        {
+          separator: true,
+        },
+        // {
+        //   template: dialogFooter,
+        // },
+      ],
+    },
+  ];
   const end = (
-    <div className="flex align-items-center gap-8">
-      <InputText
-        placeholder="Search"
-        type="text"
-        className="w-full sm:w-auto"
-        style={{ width: 1931 }}
+    <div>
+      <Menu
+        model={itemsSettings}
+        popup
+        ref={menuRight}
+        id="popup_menu_right"
+        popupAlignment="right"
       />
-      <Avatar
-        image="https://primefaces.org/cdn/primereact/images/avatar/amyelsner.png"
-        shape="circle"
+      <Button
+        rounded
+        outlined
+        icon="pi pi-cog"
+        aria-label="Filter"
+        className="mr-2"
+        onClick={(event) => menuRight.current?.toggle(event)}
+        aria-controls="popup_menu_right"
+        aria-haspopup
       />
     </div>
   );
-
+  const [visible, setVisible] = useState<boolean>(false);
   return (
-    <div className="card">
-      <Menubar
-        model={items}
-        start={start}
-        end={end}
-      />
-    </div>
+    <>
+      <div className="card">
+        <Menubar
+          model={items}
+          start={start}
+          end={end}
+        />
+      </div>
+      <Sidebar
+        visible={visible}
+        position="right"
+        onHide={() => setVisible(false)}
+      >
+        <h2>Dark Themes:</h2>
+        <div className="flex flex-wrap ">
+          {ThemeService.getDarkThemes().map((col, _i) => (
+            <div className="flex bg-primary m-1 border-round">
+              <Button
+                onClick={() => ThemeService.showTheme(col)}
+                className="cursor-pointer p-link"
+              >
+                <Image
+                  src={col.themeImage}
+                  width="50"
+                  alt="saga-blue"
+                />
+              </Button>
+            </div>
+          ))}
+        </div>
+
+        <h2>Light Themes:</h2>
+        <div className="flex flex-wrap ">
+          {ThemeService.getLightThemes().map((col, _i) => (
+            <div className="flex bg-primary m-1 border-round">
+              <Button
+                onClick={() => ThemeService.showTheme(col)}
+                className="cursor-pointer p-link"
+              >
+                <Image
+                  src={col.themeImage}
+                  width="50"
+                  alt="saga-blue"
+                />
+              </Button>
+            </div>
+          ))}
+        </div>
+      </Sidebar>
+    </>
   );
 }
 
