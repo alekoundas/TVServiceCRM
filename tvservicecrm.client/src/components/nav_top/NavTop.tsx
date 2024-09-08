@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { Menu } from "primereact/menu";
 import { Button } from "primereact/button";
 import { MenuItem } from "primereact/menuitem";
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Sidebar } from "primereact/sidebar";
 import { ThemeService } from "../../services/ThemeService";
 import { Image } from "primereact/image";

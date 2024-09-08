@@ -2,8 +2,7 @@
 
 namespace TVServiceCRM.Server.Model.Models
 {
-    public class User : IdentityUser
+    public class ApplicationUser : IdentityUser
     {
-        public string skata { get; set; } = "";
     }
 }

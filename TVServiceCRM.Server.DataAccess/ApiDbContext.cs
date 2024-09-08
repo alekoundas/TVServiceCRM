@@ -7,7 +7,7 @@ using TVServiceCRM.Server.Model.Models;
 
 namespace TVServiceCRM.Server.DataAccess
 {
-    public class ApiDbContext : IdentityDbContext<User>, IDataProtectionKeyContext
+    public class ApiDbContext : IdentityDbContext<ApplicationUser>, IDataProtectionKeyContext
     {
         public ApiDbContext() { }
         public ApiDbContext(DbContextOptions<ApiDbContext> options) : base(options)

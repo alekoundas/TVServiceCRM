@@ -1,11 +1,11 @@
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
-import { UserLoginDto } from "../../model/UserLoginDto";
 import { useState } from "react";
 import ApiService from "../../services/ApiService";
+import { UserLoginRequestDto } from "../../model/UserLoginRequestDto";
 
 export default function Login() {
-  const [userLoginDto, setUserLoginDto] = useState(new UserLoginDto());
+  const [userLoginDto, setUserLoginDto] = useState(new UserLoginRequestDto());
   const handleChange = (event: React.ChangeEvent<any>) => {
     const name = event.target.name;
     const value = event.target.value;

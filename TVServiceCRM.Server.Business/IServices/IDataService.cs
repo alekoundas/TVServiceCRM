@@ -12,7 +12,7 @@ namespace TVServiceCRM.Server.Business.IServices
         GenericRepository<ContactInformation> ContactInformations { get; }
         GenericRepository<Customer> Customers { get;}
         GenericRepository<Ticket> Tickets { get;}
-        GenericRepository<User> Users { get; }
+        GenericRepository<ApplicationUser> Users { get; }
 
 
 

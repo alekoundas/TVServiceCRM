@@ -1,9 +1,9 @@
-export class UserLoginDto {
+export class UserRegisterRequestDto {
   email: string = "";
   password: string = "";
 }
 
-export interface UserLoginDto {
+export interface UserRegisterRequestDto {
   [key: string]: any;
   email: string;
   password: string;
