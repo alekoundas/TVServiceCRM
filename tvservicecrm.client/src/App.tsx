@@ -27,7 +27,7 @@ export default function App() {
         ref={theme}
         rel="stylesheet"
         type="text/css"
-        href="/public/themes/theme-bootstrap4-dark-blue.css"
+        href="/src/assets/themes/theme-bootstrap4-dark-blue.css"
       />
 
       <Toast ref={toast} />
