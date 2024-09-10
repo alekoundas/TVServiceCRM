@@ -8,11 +8,11 @@ export namespace ToastService {
     toastRef = toastRefValue;
   }
 
-  export function showSuccess() {
+  export function showSuccess(message: string) {
     toastRef.current?.show({
       severity: "success",
       summary: "Success",
-      detail: "Update was successfull.",
+      detail: message,
     });
   }
 

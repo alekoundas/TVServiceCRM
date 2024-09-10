@@ -14,6 +14,7 @@ using TVServiceCRM.Server.Business.Services;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
+using Azure;
 
 namespace TVServiceCRM.Server.Controllers
 {
@@ -91,7 +92,7 @@ namespace TVServiceCRM.Server.Controllers
 
 
         [HttpPost]
-        public async Task<ApiResponse<UserLoginResponseDto>> Login(UserLoginRequestDto request)
+        public async Task<ActionResult<ApiResponse<UserLoginResponseDto>>> Login(UserLoginRequestDto request)
         {
             var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
@@ -105,6 +106,14 @@ namespace TVServiceCRM.Server.Controllers
                 if (result.Succeeded)
                 {
                     var token = await GenerateUserToken(user);
+                    Response.Cookies.Append("AuthToken", token.AccessToken, new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Secure = false, // Only sent over HTTPS
+                        SameSite = SameSiteMode.Strict, // Prevent CSRF attacks
+                        Expires = DateTimeOffset.UtcNow.AddHours(1) // Set expiration
+                    });
+
                     return new ApiResponse<UserLoginResponseDto>().SetSuccessResponse(token);
                 }
                 else

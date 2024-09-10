@@ -1,11 +1,12 @@
+import { ApiResponse } from "../model/ApiResponse";
 import { DataTableDto } from "../model/DataTableDto";
 import { UserLoginRequestDto } from "../model/UserLoginRequestDto";
 import { UserLoginResponseDto } from "../model/UserLoginResponseDto";
 import { ToastService } from "./ToastService";
 
 export class ApiService {
-  static serverUrl = "https://alexps.gr/api/";
-  // static serverUrl = "http://localhost:8080/api/";
+  // static serverUrl = "https://alexps.gr/api/";
+  static serverUrl = "http://localhost:8080/api/";
 
   static async get<TEntity>(
     controller: string,
@@ -103,9 +104,7 @@ export class ApiService {
 
   static async login(
     data: UserLoginRequestDto
-  ): Promise<UserLoginResponseDto | null> {
-    // const jwt = require("jsonwebtoken");
-
+  ): Promise<ApiResponse<UserLoginResponseDto> | null> {
     try {
       const url = this.serverUrl + "users/login";
 
@@ -114,13 +113,22 @@ export class ApiService {
         body: JSON.stringify(data),
         headers: {
           "Content-Type": "application/json",
+          accept: "text/plain",
         },
       });
 
-      const responseJson = await response.json();
-      return responseJson;
+      const result: ApiResponse<UserLoginResponseDto> = await response.json();
+      if (result.isSucceed && result.data) {
+        ToastService.showSuccess("Login was successfull!");
+      } else {
+        ToastService.showError("Login Failed!");
+      }
+
+      return result;
     } catch (error) {
-      ToastService.showError("asdasd");
+      ToastService.showError(
+        "Something unexpected happend! API call was not successfull"
+      );
       console.error(error);
       return null;
     }

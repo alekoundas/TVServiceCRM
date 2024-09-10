@@ -2,7 +2,7 @@ import { Route, Routes } from "react-router-dom";
 import { ScrollPanel } from "primereact/scrollpanel";
 import { ToastService } from "./services/ToastService.tsx";
 import { ThemeService } from "./services/ThemeService.tsx";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import { Toast } from "primereact/toast";
 
 import NavTop from "./components/nav_top/NavTop.tsx";
@@ -17,8 +17,13 @@ export default function App() {
   // Set Toast messages here
   const toast = useRef<Toast>(null);
   const theme = useRef<HTMLLinkElement>(null);
-  ToastService.setToastRef(toast);
-  ThemeService.setRef(theme);
+
+  useEffect(() => {
+    ToastService.setToastRef(toast);
+    ThemeService.setRef(theme);
+    ThemeService.setDefaultTheme();
+    ThemeService.setDefaultThemeScale();
+  }, []);
 
   return (
     <>
@@ -27,10 +32,9 @@ export default function App() {
         ref={theme}
         rel="stylesheet"
         type="text/css"
-        href="/src/assets/themes/theme-bootstrap4-dark-blue.css"
       />
-
       <Toast ref={toast} />
+
       <div className=" w-full ">
         <div className="flex flex-row pb-3">
           <div className="flex flex-column w-full">

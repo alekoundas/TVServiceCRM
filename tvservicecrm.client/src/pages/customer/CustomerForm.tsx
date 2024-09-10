@@ -207,7 +207,7 @@ export default function CustomerForm() {
         contactInformation,
         contactInformation.id
       ).then(() => {
-        ToastService.showSuccess();
+        ToastService.showSuccess("");
         contactInformationDataTableService.loadData(null);
       });
     }
@@ -245,7 +245,7 @@ export default function CustomerForm() {
     // Edit mode.
     if (ticket.id > 0) {
       ApiService.update("tickets", ticket, ticket.id).then(() => {
-        ToastService.showSuccess();
+        ToastService.showSuccess("");
         ticketDataTableService.loadData(null);
       });
     }
@@ -286,7 +286,7 @@ export default function CustomerForm() {
       customer.contactInformations = contactInformationDataTableDto.data;
 
       ApiService.create("customers", customer).then((x) => {
-        ToastService.showSuccess();
+        ToastService.showSuccess("");
         navigate("/customers/" + x?.id + "/view");
       });
     }

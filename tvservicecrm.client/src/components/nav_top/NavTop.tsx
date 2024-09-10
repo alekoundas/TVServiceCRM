@@ -4,10 +4,12 @@ import { useNavigate } from "react-router-dom";
 import { Menu } from "primereact/menu";
 import { Button } from "primereact/button";
 import { MenuItem } from "primereact/menuitem";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Sidebar } from "primereact/sidebar";
 import { ThemeService } from "../../services/ThemeService";
 import { Image } from "primereact/image";
+import { Knob } from "primereact/knob";
+import { LocalStorageService } from "../../services/LocalStorageService";
 
 function NavTop() {
   const navigate = useNavigate();
@@ -163,6 +165,23 @@ function NavTop() {
     </div>
   );
   const [visible, setVisible] = useState<boolean>(false);
+  const [value, setValue] = useState(0);
+
+  const handleChange = (value: number) => {
+    // ThemeService.setThemeScale(14);
+    setValue(value);
+    ThemeService.setThemeScale(value + 5);
+  };
+
+  useEffect(() => {
+    const localStorageThemeScale = LocalStorageService.getThemeScale();
+    if (localStorageThemeScale) {
+      setValue(+localStorageThemeScale);
+    } else {
+      setValue(14);
+    }
+  }, []);
+
   return (
     <>
       <div className="card">
@@ -172,21 +191,48 @@ function NavTop() {
           end={end}
         />
       </div>
+
+      {/* Remove from here */}
       <Sidebar
         visible={visible}
         position="right"
         onHide={() => setVisible(false)}
       >
+        <h2>Theme scale:</h2>
+
+        <div className="card flex flex-column align-items-center gap-2">
+          <Knob
+            value={value}
+            onChange={(e) => handleChange(e.value)}
+            max={20}
+            size={100}
+          />
+          <div className="flex gap-2">
+            <Button
+              icon="pi pi-plus"
+              onClick={() => handleChange(value + 1)}
+              disabled={value === 20}
+            />
+            <Button
+              icon="pi pi-minus"
+              onClick={() => handleChange(value - 1)}
+              disabled={value === 0}
+            />
+          </div>
+        </div>
         <h2>Dark Themes:</h2>
         <div className="flex flex-wrap ">
-          {ThemeService.getDarkThemes().map((col, _i) => (
-            <div className="flex bg-primary m-1 border-round">
+          {ThemeService.getDarkThemes().map((row, index) => (
+            <div
+              key={index}
+              className="flex bg-primary m-1 border-round"
+            >
               <Button
-                onClick={() => ThemeService.showTheme(col)}
+                onClick={() => ThemeService.setTheme(row)}
                 className="cursor-pointer p-link"
               >
                 <Image
-                  src={col.themeImage}
+                  src={row.themeImage}
                   width="50"
                   alt="saga-blue"
                 />
@@ -197,14 +243,17 @@ function NavTop() {
 
         <h2>Light Themes:</h2>
         <div className="flex flex-wrap ">
-          {ThemeService.getLightThemes().map((col, _i) => (
-            <div className="flex bg-primary m-1 border-round">
+          {ThemeService.getLightThemes().map((row, index) => (
+            <div
+              key={index}
+              className="flex bg-primary m-1 border-round"
+            >
               <Button
-                onClick={() => ThemeService.showTheme(col)}
+                onClick={() => ThemeService.setTheme(row)}
                 className="cursor-pointer p-link"
               >
                 <Image
-                  src={col.themeImage}
+                  src={row.themeImage}
                   width="50"
                   alt="saga-blue"
                 />
