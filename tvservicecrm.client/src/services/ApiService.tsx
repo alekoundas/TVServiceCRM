@@ -5,8 +5,8 @@ import { UserLoginResponseDto } from "../model/UserLoginResponseDto";
 import { ToastService } from "./ToastService";
 
 export class ApiService {
-  // static serverUrl = "https://alexps.gr/api/";
-  static serverUrl = "http://localhost:8080/api/";
+  static serverUrl = "https://alexps.gr/api/";
+  // static serverUrl = "http://localhost:8080/api/";
 
   static async get<TEntity>(
     controller: string,
