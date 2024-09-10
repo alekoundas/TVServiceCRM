@@ -110,7 +110,7 @@ namespace TVServiceCRM.Server.Controllers
                     {
                         HttpOnly = true,
                         Secure = false, // Only sent over HTTPS
-                        SameSite = SameSiteMode.Strict, // Prevent CSRF attacks
+                        SameSite = SameSiteMode.Lax, // Prevent CSRF attacks
                         Expires = DateTimeOffset.UtcNow.AddHours(1) // Set expiration
                     });
 
@@ -134,12 +134,13 @@ namespace TVServiceCRM.Server.Controllers
         //    return await _userService.UserLogoutAsync(User);
         //}
 
-        //[HttpPost]
+        [HttpPost]
         //[Authorize]
-        //public string Profile()
-        //{
-        //    return User.FindFirst("UserName")?.Value ?? "";
-        //}
+        [Authorize(Roles = "Administrator")]
+        public string Profile()
+        {
+            return User.FindFirst("UserName")?.Value ?? "";
+        }
 
 
 

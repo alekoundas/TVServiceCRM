@@ -12,6 +12,7 @@ import Customers from "./pages/customer/Customers.tsx";
 import CustomerForm from "./pages/customer/CustomerForm.tsx";
 import Tickets from "./pages/ticket/Tickets.tsx";
 import Login from "./pages/user/Login.tsx";
+import ApiService from "./services/ApiService.tsx";
 
 export default function App() {
   // Set Toast messages here
@@ -23,6 +24,8 @@ export default function App() {
     ThemeService.setRef(theme);
     ThemeService.setDefaultTheme();
     ThemeService.setDefaultThemeScale();
+
+    ApiService.test();
   }, []);
 
   return (

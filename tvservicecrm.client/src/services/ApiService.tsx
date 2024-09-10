@@ -133,5 +133,23 @@ export class ApiService {
       return null;
     }
   }
+
+  static async test<TEntity>(): Promise<TEntity | null> {
+    try {
+      const response = await fetch(this.serverUrl + "users/profile", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+
+      const responseJson = await response.json();
+
+      return responseJson;
+    } catch (error) {
+      return null;
+      console.error(error);
+    }
+  }
 }
 export default ApiService;
