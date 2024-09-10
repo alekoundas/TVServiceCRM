@@ -106,10 +106,10 @@ builder.Services.AddIdentityCore<ApplicationUser>()
              .AddEntityFrameworkStores<ApiDbContext>()
              .AddTokenProvider<DataProtectorTokenProvider<ApplicationUser>>("REFRESHTOKENPROVIDER");
 
-builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
-{
-    options.TokenLifespan = TimeSpan.FromHours(12);
-});
+//builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+//{
+//    options.TokenLifespan = TimeSpan.FromHours(12);
+//});
 
 builder.Services.AddAuthentication(options =>
 {

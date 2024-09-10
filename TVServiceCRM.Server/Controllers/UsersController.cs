@@ -110,8 +110,9 @@ namespace TVServiceCRM.Server.Controllers
                     {
                         HttpOnly = true,
                         Secure = false, // Only sent over HTTPS
-                        SameSite = SameSiteMode.Lax, // Prevent CSRF attacks
-                        Expires = DateTimeOffset.UtcNow.AddHours(1) // Set expiration
+                        SameSite = SameSiteMode.None, // Prevent CSRF attacks
+                        Expires = DateTimeOffset.UtcNow.AddHours(1), // Set expiration
+                        Path = "/"
                     });
 
                     return new ApiResponse<UserLoginResponseDto>().SetSuccessResponse(token);
