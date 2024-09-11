@@ -55,6 +55,6 @@ networks:
       driver: bridge
     
 
-volumes: 
-   test1: 
-     external: true  
+# volumes: 
+#    test1: 
+#      external: true  

@@ -103,8 +103,8 @@ builder.Services.AddDataProtection().PersistKeysToDbContext<ApiDbContext>();
 builder.Services.AddIdentityCore<ApplicationUser>()
              .AddRoles<IdentityRole>()
              .AddSignInManager()
-             .AddEntityFrameworkStores<ApiDbContext>()
-             .AddTokenProvider<DataProtectorTokenProvider<ApplicationUser>>("REFRESHTOKENPROVIDER");
+             .AddEntityFrameworkStores<ApiDbContext>();
+             //.AddTokenProvider<DataProtectorTokenProvider<ApplicationUser>>("REFRESHTOKENPROVIDER");
 
 //builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
 //{
@@ -125,7 +125,8 @@ builder.Services.AddAuthentication(options =>
         ValidateIssuerSigningKey = true,
         RequireExpirationTime = true,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("DFDGERsjsfjepoeoe@@#$$@$@123112sdaaadasQEWw")),
-        ClockSkew = TimeSpan.FromSeconds(0)
+        //ClockSkew = TimeSpan.FromSeconds(0)
+        //ValidAudiences = new[] { "http://localhost:8080", "https://localhost:8080", "http://localhost:5173", "https://localhost:5173" },
     };
 
     options.Events = new JwtBearerEvents
@@ -188,6 +189,23 @@ var app = builder.Build();
 app.UseDefaultFiles();
 app.UseStaticFiles();
 
+// NGINX reverse proxy.
+app.UseForwardedHeaders(new ForwardedHeadersOptions
+{
+    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
+});
+
+
+app.UseCors(options => options.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+app.UseAuthentication();
+app.UseAuthorization();
+app.MapControllers();
+app.MapFallbackToFile("/index.html");
+
+
+
+//app.MapGroup("/api/users").MapIdentityApi<User>();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -196,37 +214,12 @@ if (app.Environment.IsDevelopment())
     //app.UseHttpsRedirection();
 }
 
-app.UseForwardedHeaders(new ForwardedHeadersOptions
-{
-    ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
-});
-
-app.UseCors(
-        options => options.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin()
-    );
-
-app.UseAuthentication();
-app.UseAuthorization();
-app.MapControllers();
-//app.MapGroup("/api/users").MapIdentityApi<User>();
-app.MapFallbackToFile("/index.html");
-
-
-
-
 
 
 
 // Run migrations to DB and add initial roles to DB.
 using (var scope = app.Services.CreateScope())
 {
-    //var services = scope.ServiceProvider;
-    //var context = services.GetRequiredService<ApiDbContext>();
-
-    //if (context.Database.GetPendingMigrations().Any())
-    //    context.Database.Migrate();
-
-
     var initialiser = scope.ServiceProvider.GetRequiredService<ApiDbContextInitialiser>();
     await initialiser.RunMigrationsAsync();
     await initialiser.SeedAsync();

@@ -15,6 +15,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using Azure;
+using Microsoft.AspNetCore.Identity.Data;
 
 namespace TVServiceCRM.Server.Controllers
 {
@@ -92,7 +93,7 @@ namespace TVServiceCRM.Server.Controllers
 
 
         [HttpPost]
-        public async Task<ActionResult<ApiResponse<UserLoginResponseDto>>> Login(UserLoginRequestDto request)
+        public async Task<ApiResponse<UserLoginResponseDto>> Login(UserLoginRequestDto request)
         {
             var user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
@@ -110,7 +111,7 @@ namespace TVServiceCRM.Server.Controllers
                     {
                         HttpOnly = true,
                         Secure = false, // Only sent over HTTPS
-                        SameSite = SameSiteMode.None, // Prevent CSRF attacks
+                        SameSite = SameSiteMode.Lax, // Prevent CSRF attacks
                         Expires = DateTimeOffset.UtcNow.AddHours(1), // Set expiration
                         Path = "/"
                     });
@@ -169,14 +170,15 @@ namespace TVServiceCRM.Server.Controllers
 
             claims.AddRange(roleClaims);
 
-            var token = GetToken(user, claims);
-            await _userManager.RemoveAuthenticationTokenAsync(user, "REFRESHTOKENPROVIDER", "RefreshToken");
-            var refreshToken = await _userManager.GenerateUserTokenAsync(user, "REFRESHTOKENPROVIDER", "RefreshToken");
-            await _userManager.SetAuthenticationTokenAsync(user, "REFRESHTOKENPROVIDER", "RefreshToken", refreshToken);
-            return new UserLoginResponseDto() { AccessToken = token, RefreshToken = refreshToken };
+            var token = GetToken2(user, claims);
+            //await _userManager.RemoveAuthenticationTokenAsync(user, "REFRESHTOKENPROVIDER", "RefreshToken");
+            //var refreshToken = await _userManager.GenerateUserTokenAsync(user, "REFRESHTOKENPROVIDER", "RefreshToken");
+            //await _userManager.SetAuthenticationTokenAsync(user, "REFRESHTOKENPROVIDER", "RefreshToken", refreshToken);
+            return new UserLoginResponseDto() { AccessToken = token, RefreshToken = ""};
+            //return new UserLoginResponseDto() { AccessToken = token, RefreshToken = refreshToken };
         }
 
-        private string GetToken( ApplicationUser user, List<Claim> roleClaims)
+        private string GetToken(ApplicationUser user, List<Claim> roleClaims)
         {
             var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("DFDGERsjsfjepoeoe@@#$$@$@123112sdaaadasQEWw"));
             var signInCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
@@ -197,5 +199,38 @@ namespace TVServiceCRM.Server.Controllers
             var tokenString = new JwtSecurityTokenHandler().WriteToken(tokeOptions);
             return tokenString;
         }
+
+
+        private string GetToken2(ApplicationUser user, List<Claim> roleClaims)
+        {
+            // Validate user credentials (e.g., check username and password)
+
+            // Generate JWT
+            var tokenHandler = new JwtSecurityTokenHandler();
+            var key = Encoding.ASCII.GetBytes("DFDGERsjsfjepoeoe@@#$$@$@123112sdaaadasQEWw"); // Use a secure key
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(roleClaims),
+                Expires = DateTime.UtcNow.AddMinutes(30),
+                //Issuer = "your_issuer",
+                //Audience = "https://localhost:5173",
+                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+            };
+
+            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var tokenString = tokenHandler.WriteToken(token);
+
+            // Set the JWT in an HttpOnly cookie
+            Response.Cookies.Append("AuthToken", tokenString, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = false, // Ensure this is true in production (HTTPS only)
+                SameSite = SameSiteMode.Lax,
+                Expires = DateTimeOffset.UtcNow.AddMinutes(30)
+            });
+
+            return tokenString ;
+        }
+
     }
 }
