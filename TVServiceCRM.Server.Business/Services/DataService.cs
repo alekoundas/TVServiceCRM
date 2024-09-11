@@ -1,8 +1,6 @@
-﻿using TVServiceCRM.Server.Business.IRepository;
-using TVServiceCRM.Server.Business.IServices;
+﻿using TVServiceCRM.Server.Business.IServices;
 using TVServiceCRM.Server.Business.Repository;
 using TVServiceCRM.Server.DataAccess;
-using Microsoft.EntityFrameworkCore;
 using TVServiceCRM.Server.Model.Models;
 
 namespace TVServiceCRM.Server.Business.Services

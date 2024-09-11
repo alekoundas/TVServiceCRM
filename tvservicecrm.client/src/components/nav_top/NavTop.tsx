@@ -10,8 +10,12 @@ import { ThemeService } from "../../services/ThemeService";
 import { Image } from "primereact/image";
 import { Knob } from "primereact/knob";
 import { LocalStorageService } from "../../services/LocalStorageService";
+import ApiService from "../../services/ApiService";
+import { useAuth } from "../../contexts/AuthContext";
 
 function NavTop() {
+  const { isUserAuthenticated, logout } = useAuth();
+
   const navigate = useNavigate();
   const menuRight = useRef<Menu>(null);
 
@@ -121,12 +125,33 @@ function NavTop() {
       label: "Options",
       items: [
         {
+          label: "Theme",
+          icon: "pi pi-palette",
+          command: () => {
+            setVisible(true);
+          },
+        },
+        {
           label: "Login",
           icon: "pi pi-user",
           command: () => {
             navigate("/user/login");
           },
         },
+        // {
+        //   separator: true,
+        // },
+        // {
+        //   template: dialogFooter,
+        // },
+      ],
+    },
+  ];
+
+  const itemsSettingsAuth: MenuItem[] = [
+    {
+      label: "Options",
+      items: [
         {
           label: "Theme",
           icon: "pi pi-palette",
@@ -135,23 +160,56 @@ function NavTop() {
           },
         },
         {
-          separator: true,
+          label: "Logout",
+          icon: "pi pi-user",
+          command: () => ApiService.logout(logout),
         },
+        // {
+        //   separator: true,
+        // },
         // {
         //   template: dialogFooter,
         // },
       ],
     },
   ];
+  const [visible, setVisible] = useState<boolean>(false);
+  const [value, setValue] = useState(0);
+
+  const handleChange = (value: number) => {
+    // ThemeService.setThemeScale(14);
+    setValue(value);
+    ThemeService.setThemeScale(value + 5);
+  };
+  useEffect(() => {
+    const localStorageThemeScale = LocalStorageService.getThemeScale();
+    if (localStorageThemeScale) {
+      setValue(+localStorageThemeScale);
+    } else {
+      setValue(14);
+    }
+  }, []);
+
   const end = (
     <div>
-      <Menu
-        model={itemsSettings}
-        popup
-        ref={menuRight}
-        id="popup_menu_right"
-        popupAlignment="right"
-      />
+      {isUserAuthenticated ? (
+        <Menu
+          model={itemsSettingsAuth}
+          popup
+          ref={menuRight}
+          id="popup_menu_right"
+          popupAlignment="right"
+        />
+      ) : (
+        <Menu
+          model={itemsSettings}
+          popup
+          ref={menuRight}
+          id="popup_menu_right"
+          popupAlignment="right"
+        />
+      )}
+
       <Button
         rounded
         outlined
@@ -164,23 +222,6 @@ function NavTop() {
       />
     </div>
   );
-  const [visible, setVisible] = useState<boolean>(false);
-  const [value, setValue] = useState(0);
-
-  const handleChange = (value: number) => {
-    // ThemeService.setThemeScale(14);
-    setValue(value);
-    ThemeService.setThemeScale(value + 5);
-  };
-
-  useEffect(() => {
-    const localStorageThemeScale = LocalStorageService.getThemeScale();
-    if (localStorageThemeScale) {
-      setValue(+localStorageThemeScale);
-    } else {
-      setValue(14);
-    }
-  }, []);
 
   return (
     <>

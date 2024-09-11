@@ -16,6 +16,10 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Text;
 using Azure;
 using Microsoft.AspNetCore.Identity.Data;
+using System.Threading.Tasks;
+using TVServiceCRM.Server.Model.System;
+using Newtonsoft.Json.Linq;
+using System.Collections.Generic;
 
 namespace TVServiceCRM.Server.Controllers
 {
@@ -28,19 +32,22 @@ namespace TVServiceCRM.Server.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly TokenSettings _tokenSettings;
 
         public UsersController(
             IDataService dataService,
             ILogger<TicketsController> logger,
             UserManager<ApplicationUser> userManager,
             SignInManager<ApplicationUser> signInManager,
-            RoleManager<IdentityRole> roleManager)
+            RoleManager<IdentityRole> roleManager,
+             TokenSettings tokenSettings)
         {
             _dataService = dataService;
             _logger = logger;
             _userManager = userManager;
             _signInManager = signInManager;
             _roleManager = roleManager;
+            _tokenSettings = tokenSettings;
         }
 
 
@@ -107,24 +114,6 @@ namespace TVServiceCRM.Server.Controllers
                 if (result.Succeeded)
                 {
                     var token = await GenerateUserToken(user);
-                    Response.Cookies.Append("AuthToken3", token.AccessToken, new CookieOptions
-                    {
-                        HttpOnly = true,
-                        Secure = false, // Only sent over HTTPS
-                        SameSite = SameSiteMode.Lax, // Prevent CSRF attacks
-                        Domain ="localhost",
-                        Expires = DateTimeOffset.UtcNow.AddHours(10), // Set expiration
-                        IsEssential = true,
-                        Path = "/"
-                    });
-
-                    Response.Cookies.Append("AuthToken2", token.AccessToken, new CookieOptions
-                    {
-                        HttpOnly = true,
-                        Domain ="localhost",
-                IsEssential = true
-                    });
-
                     return new ApiResponse<UserLoginResponseDto>().SetSuccessResponse(token);
                 }
                 else
@@ -134,16 +123,46 @@ namespace TVServiceCRM.Server.Controllers
             }
         }
 
-        //[HttpPost]
-        //public async Task<AppResponse<UserRefreshTokenResponse>> RefreshToken(UserRefreshTokenRequest req)
-        //{
-        //    return await _userService.UserRefreshTokenAsync(req);
-        //}
-        //[HttpPost]
-        //public async Task<AppResponse<bool>> Logout()
-        //{
-        //    return await _userService.UserLogoutAsync(User);
-        //}
+        [HttpPost]
+        public async Task<ApiResponse<UserRefreshResponseDto>> refreshtoken(UserRefreshRequestDto request)
+        {
+            var principal = GetPrincipalFromExpiredToken(_tokenSettings, request.AccessToken);
+            if (principal == null || principal.FindFirst("UserName")?.Value == null)
+            {
+                return new ApiResponse<UserRefreshResponseDto>().SetErrorResponse("email", "User not found");
+            }
+            else
+            {
+                var user = await _userManager.FindByNameAsync(principal.FindFirst("UserName")?.Value ?? "");
+                if (user == null)
+                {
+                    return new ApiResponse<UserRefreshResponseDto>().SetErrorResponse("email", "User not found");
+                }
+                else
+                {
+                    if (!await _userManager.VerifyUserTokenAsync(user, "REFRESHTOKENPROVIDER", "RefreshToken", request.RefreshToken))
+                    {
+                        return new ApiResponse<UserRefreshResponseDto>().SetErrorResponse("token", "Refresh token expired");
+                    }
+                    var token = await GenerateUserToken(user);
+                    return new ApiResponse<UserRefreshResponseDto>()
+                        .SetSuccessResponse(new UserRefreshResponseDto() { AccessToken = token.AccessToken, RefreshToken = token.RefreshToken });
+                }
+            }
+        }
+        [HttpPost]
+        public async Task<ApiResponse<bool>> logout()
+        {
+
+            if (User.Identity?.IsAuthenticated ?? false)
+            {
+                var username = User.Claims.First(x => x.Type == "UserName").Value;
+                var appUser = await _dataService.Users.FirstOrDefaultAsync(x => x.UserName == username);
+                if (appUser != null) { await _userManager.UpdateSecurityStampAsync(appUser); }
+                return new ApiResponse<bool>().SetSuccessResponse(true);
+            }
+            return new ApiResponse<bool>().SetSuccessResponse(true);
+        }
 
         [HttpPost]
         //[Authorize]
@@ -179,88 +198,57 @@ namespace TVServiceCRM.Server.Controllers
 
             claims.AddRange(roleClaims);
 
-            var token = GetToken2(user, claims);
-            //await _userManager.RemoveAuthenticationTokenAsync(user, "REFRESHTOKENPROVIDER", "RefreshToken");
-            //var refreshToken = await _userManager.GenerateUserTokenAsync(user, "REFRESHTOKENPROVIDER", "RefreshToken");
-            //await _userManager.SetAuthenticationTokenAsync(user, "REFRESHTOKENPROVIDER", "RefreshToken", refreshToken);
-            return new UserLoginResponseDto() { AccessToken = token, RefreshToken = ""};
-            //return new UserLoginResponseDto() { AccessToken = token, RefreshToken = refreshToken };
+            var token = GetToken(_tokenSettings, user, claims);
+            await _userManager.RemoveAuthenticationTokenAsync(user, "REFRESHTOKENPROVIDER", "RefreshToken");
+            var refreshToken = await _userManager.GenerateUserTokenAsync(user, "REFRESHTOKENPROVIDER", "RefreshToken");
+            await _userManager.SetAuthenticationTokenAsync(user, "REFRESHTOKENPROVIDER", "RefreshToken", refreshToken);
+            return new UserLoginResponseDto() { AccessToken = token, RefreshToken = refreshToken };
         }
 
-        private string GetToken(ApplicationUser user, List<Claim> roleClaims)
+        private string GetToken(TokenSettings appSettings, ApplicationUser user, List<Claim> roleClaims)
         {
-            var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("DFDGERsjsfjepoeoe@@#$$@$@123112sdaaadasQEWw"));
+            var secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(appSettings.SecretKey));
             var signInCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);
 
-            var userClaims = new List<Claim>
-            {
-                new("Id", user.Id.ToString()),
-                new ("UserName", user.UserName??"")
-            };
+            var userClaims = new List<Claim>();
+            userClaims.Add(new("Id", user.Id.ToString()));
+            userClaims.Add(new("UserName", user.UserName ?? ""));
             userClaims.AddRange(roleClaims);
+            userClaims.AddRange(appSettings.Audiences.Select(x => new Claim(JwtRegisteredClaimNames.Aud, x)));
+
+
             var tokeOptions = new JwtSecurityToken(
-                //issuer: appSettings.Issuer,
-                //audience: appSettings.Audience,
+                issuer: appSettings.Issuer,
+                audience: appSettings.Audience,
                 claims: userClaims,
-                expires: DateTime.UtcNow.AddHours(10),
+                expires: DateTime.UtcNow.AddSeconds(appSettings.TokenExpireSeconds),
                 signingCredentials: signInCredentials
             );
+
             var tokenString = new JwtSecurityTokenHandler().WriteToken(tokeOptions);
+
             return tokenString;
         }
 
 
-        private string GetToken2(ApplicationUser user, List<Claim> roleClaims)
-        {
-            // Validate user credentials (e.g., check username and password)
 
-            // Generate JWT
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.ASCII.GetBytes("DFDGERsjsfjepoeoe@@#$$@$@123112sdaaadasQEWw"); // Use a secure key
-            var tokenDescriptor = new SecurityTokenDescriptor
+        private ClaimsPrincipal GetPrincipalFromExpiredToken(TokenSettings appSettings, string token)
+        {
+            var tokenValidationParameters = new TokenValidationParameters
             {
-                Subject = new ClaimsIdentity(roleClaims),
-                
-                Expires = DateTime.UtcNow.AddMinutes(30),
-                //Issuer = "your_issuer",
-                //Audience = "https://localhost:5173",
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                ValidateIssuer = true,
+                ValidateAudience = false,
+                ValidAudiences = appSettings.Audiences,
+                //ValidIssuer = appSettings.Issuer,
+                ValidateLifetime = false,
+                IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(appSettings.SecretKey))
             };
 
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            var tokenString = tokenHandler.WriteToken(token);
+            var principal = new JwtSecurityTokenHandler().ValidateToken(token, tokenValidationParameters, out SecurityToken securityToken);
+            if (securityToken is not JwtSecurityToken jwtSecurityToken || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
+                throw new SecurityTokenException("GetPrincipalFromExpiredToken Token is not validated");
 
-            // Set the JWT in an HttpOnly cookie
-            Response.Cookies.Append("1AuthToken", tokenString, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = false, // Ensure this is true in production (HTTPS only)
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTimeOffset.UtcNow.AddMinutes(30),
-                IsEssential = true
-            });
-
-
-            // Set the JWT in an HttpOnly cookie
-            Response.Cookies.Append("1AuthToken", tokenString, new CookieOptions
-            {
-                HttpOnly = true,
-                Secure = true, // Ensure this is true in production (HTTPS only)
-                SameSite = SameSiteMode.Strict,
-                Expires = DateTimeOffset.UtcNow.AddMinutes(30),
-                IsEssential = true
-            });
-
-
-            Response.Cookies.Append("AuthToken", tokenString, new CookieOptions
-            {
-                HttpOnly = true,
-                IsEssential = true
-            });
-
-
-            return tokenString ;
+            return principal;
         }
-
     }
 }

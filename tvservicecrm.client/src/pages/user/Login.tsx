@@ -3,8 +3,11 @@ import { InputText } from "primereact/inputtext";
 import { useState } from "react";
 import ApiService from "../../services/ApiService";
 import { UserLoginRequestDto } from "../../model/UserLoginRequestDto";
+import { useAuth } from "../../contexts/AuthContext";
 
 export default function Login() {
+  const { login } = useAuth();
+
   const [userLoginDto, setUserLoginDto] = useState(new UserLoginRequestDto());
   const handleChange = (event: React.ChangeEvent<any>) => {
     const name = event.target.name;
@@ -15,7 +18,7 @@ export default function Login() {
   };
 
   const onLogin = () => {
-    ApiService.login(userLoginDto);
+    ApiService.login(userLoginDto, login);
   };
   return (
     <>
