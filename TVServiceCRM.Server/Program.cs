@@ -117,16 +117,17 @@ builder.Services.AddAuthentication(options =>
     options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
 }).AddJwtBearer(options =>
 {
+    options.RequireHttpsMetadata = false;
     options.TokenValidationParameters = new TokenValidationParameters
     {
         ValidateIssuer = false,
-        ValidateAudience = false,
+        ValidateAudience = true,
+        ValidAudiences = new[] { "http://localhost:8080", "https://localhost:8080", "http://localhost:5173", "https://localhost:5173" },
         ValidateLifetime = true,
         ValidateIssuerSigningKey = true,
         RequireExpirationTime = true,
         IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes("DFDGERsjsfjepoeoe@@#$$@$@123112sdaaadasQEWw")),
         //ClockSkew = TimeSpan.FromSeconds(0)
-        //ValidAudiences = new[] { "http://localhost:8080", "https://localhost:8080", "http://localhost:5173", "https://localhost:5173" },
     };
 
     options.Events = new JwtBearerEvents
@@ -196,7 +197,7 @@ app.UseForwardedHeaders(new ForwardedHeadersOptions
 });
 
 
-app.UseCors(options => options.AllowAnyHeader().AllowAnyMethod().AllowAnyOrigin());
+app.UseCors(options => options.WithOrigins("http://localhost:5173", "https://localhost:5173", "https://alexps.gr", "http://alexps.gr").AllowAnyHeader().AllowAnyMethod().AllowCredentials());
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();

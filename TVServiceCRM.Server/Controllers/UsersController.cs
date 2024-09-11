@@ -107,13 +107,22 @@ namespace TVServiceCRM.Server.Controllers
                 if (result.Succeeded)
                 {
                     var token = await GenerateUserToken(user);
-                    Response.Cookies.Append("AuthToken", token.AccessToken, new CookieOptions
+                    Response.Cookies.Append("AuthToken3", token.AccessToken, new CookieOptions
                     {
                         HttpOnly = true,
                         Secure = false, // Only sent over HTTPS
                         SameSite = SameSiteMode.Lax, // Prevent CSRF attacks
-                        Expires = DateTimeOffset.UtcNow.AddHours(1), // Set expiration
+                        Domain ="localhost",
+                        Expires = DateTimeOffset.UtcNow.AddHours(10), // Set expiration
+                        IsEssential = true,
                         Path = "/"
+                    });
+
+                    Response.Cookies.Append("AuthToken2", token.AccessToken, new CookieOptions
+                    {
+                        HttpOnly = true,
+                        Domain ="localhost",
+                IsEssential = true
                     });
 
                     return new ApiResponse<UserLoginResponseDto>().SetSuccessResponse(token);
@@ -211,6 +220,7 @@ namespace TVServiceCRM.Server.Controllers
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(roleClaims),
+                
                 Expires = DateTime.UtcNow.AddMinutes(30),
                 //Issuer = "your_issuer",
                 //Audience = "https://localhost:5173",
@@ -221,13 +231,33 @@ namespace TVServiceCRM.Server.Controllers
             var tokenString = tokenHandler.WriteToken(token);
 
             // Set the JWT in an HttpOnly cookie
-            Response.Cookies.Append("AuthToken", tokenString, new CookieOptions
+            Response.Cookies.Append("1AuthToken", tokenString, new CookieOptions
             {
                 HttpOnly = true,
                 Secure = false, // Ensure this is true in production (HTTPS only)
-                SameSite = SameSiteMode.Lax,
-                Expires = DateTimeOffset.UtcNow.AddMinutes(30)
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTimeOffset.UtcNow.AddMinutes(30),
+                IsEssential = true
             });
+
+
+            // Set the JWT in an HttpOnly cookie
+            Response.Cookies.Append("1AuthToken", tokenString, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true, // Ensure this is true in production (HTTPS only)
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTimeOffset.UtcNow.AddMinutes(30),
+                IsEssential = true
+            });
+
+
+            Response.Cookies.Append("AuthToken", tokenString, new CookieOptions
+            {
+                HttpOnly = true,
+                IsEssential = true
+            });
+
 
             return tokenString ;
         }

@@ -111,9 +111,10 @@ export class ApiService {
       const response = await fetch(url, {
         method: "POST",
         body: JSON.stringify(data),
+        credentials: "include",
         headers: {
           "Content-Type": "application/json",
-          accept: "text/plain",
+          // accept: "text/plain",
         },
       });
 
@@ -137,6 +138,7 @@ export class ApiService {
   static async test<TEntity>(): Promise<TEntity | null> {
     try {
       const response = await fetch(this.serverUrl + "users/profile", {
+        credentials: "include",
         method: "POST",
         headers: {
           "Content-Type": "application/json",
