@@ -120,59 +120,48 @@ function NavTop() {
   //   </React.Fragment>
   // );
 
-  const itemsSettings: MenuItem[] = [
-    {
-      label: "Options",
-      items: [
-        {
-          label: "Theme",
-          icon: "pi pi-palette",
-          command: () => {
-            setVisible(true);
+  const getItemsSettings = (): MenuItem[] => {
+    let items: MenuItem[] = [
+      {
+        label: "Options",
+        items: [
+          {
+            label: "Theme",
+            icon: "pi pi-palette",
+            command: () => {
+              setVisible(true);
+            },
           },
-        },
-        {
-          label: "Login",
-          icon: "pi pi-user",
-          command: () => {
-            navigate("/user/login");
-          },
-        },
-        // {
-        //   separator: true,
-        // },
-        // {
-        //   template: dialogFooter,
-        // },
-      ],
-    },
-  ];
 
-  const itemsSettingsAuth: MenuItem[] = [
-    {
-      label: "Options",
-      items: [
-        {
-          label: "Theme",
-          icon: "pi pi-palette",
-          command: () => {
-            setVisible(true);
-          },
+          // {
+          //   separator: true,
+          // },
+          // {
+          //   template: dialogFooter,
+          // },
+        ],
+      },
+    ];
+
+    if (isUserAuthenticated) {
+      (items[0].items as MenuItem[])?.push({
+        label: "Logout",
+        icon: "pi pi-user",
+        command: () => ApiService.logout(logout),
+      });
+    } else {
+      (items[0].items as MenuItem[])?.push({
+        label: "Login",
+        icon: "pi pi-user",
+        command: () => {
+          navigate("/user/login");
         },
-        {
-          label: "Logout",
-          icon: "pi pi-user",
-          command: () => ApiService.logout(logout),
-        },
-        // {
-        //   separator: true,
-        // },
-        // {
-        //   template: dialogFooter,
-        // },
-      ],
-    },
-  ];
+      });
+    }
+
+    return items;
+  };
+
   const [visible, setVisible] = useState<boolean>(false);
   const [value, setValue] = useState(0);
 
@@ -192,24 +181,13 @@ function NavTop() {
 
   const end = (
     <div>
-      {isUserAuthenticated ? (
-        <Menu
-          model={itemsSettingsAuth}
-          popup
-          ref={menuRight}
-          id="popup_menu_right"
-          popupAlignment="right"
-        />
-      ) : (
-        <Menu
-          model={itemsSettings}
-          popup
-          ref={menuRight}
-          id="popup_menu_right"
-          popupAlignment="right"
-        />
-      )}
-
+      <Menu
+        model={getItemsSettings()}
+        popup
+        ref={menuRight}
+        id="popup_menu_right"
+        popupAlignment="right"
+      />
       <Button
         rounded
         outlined

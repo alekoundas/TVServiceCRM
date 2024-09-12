@@ -1,4 +1,5 @@
 import { createContext, useContext, useState, ReactNode } from "react";
+import { TokenService } from "../services/TokenService";
 
 // Create the AuthContext
 interface AuthContextProps {
@@ -20,7 +21,9 @@ export const useAuth = () => {
 
 // AuthProvider component
 export const AuthProvider = ({ children }: { children: ReactNode }) => {
-  const [isUserAuthenticated, setIsUserAuthenticated] = useState(false);
+  const [isUserAuthenticated, setIsUserAuthenticated] = useState(
+    !TokenService.isRefreshTokenExpired()
+  );
 
   const login = () => {
     setIsUserAuthenticated(true); // Set authentication to true

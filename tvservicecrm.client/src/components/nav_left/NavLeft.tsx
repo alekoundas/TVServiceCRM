@@ -26,6 +26,13 @@ function NavLeft() {
             navigate("/tickets");
           },
         },
+        {
+          label: "Roles",
+          icon: "pi pi-key",
+          command: () => {
+            navigate("/user/roles");
+          },
+        },
       ],
     },
     // {

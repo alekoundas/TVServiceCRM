@@ -16,20 +16,20 @@ export namespace ToastService {
     });
   }
 
-  export function showInfo() {
+  export function showInfo(message: string) {
     toastRef.current?.show({
       severity: "info",
       summary: "Info",
-      detail: "Message Content",
+      detail: message,
       life: 3000,
     });
   }
 
-  export function showWarn() {
+  export function showWarn(message: string) {
     toastRef.current?.show({
       severity: "warn",
       summary: "Warning",
-      detail: "Message Content",
+      detail: message,
       life: 3000,
     });
   }
@@ -43,20 +43,20 @@ export namespace ToastService {
     });
   }
 
-  export function showSecondary() {
+  export function showSecondary(message: string) {
     toastRef.current?.show({
       severity: "secondary",
       summary: "Secondary",
-      detail: "Message Content",
+      detail: message,
       life: 3000,
     });
   }
 
-  export function showContrast() {
+  export function showContrast(message: string) {
     toastRef.current?.show({
       severity: "contrast",
       summary: "Contrast",
-      detail: "Message Content",
+      detail: message,
       life: 3000,
     });
   }

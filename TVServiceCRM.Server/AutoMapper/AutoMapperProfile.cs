@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Identity;
 using TVServiceCRM.Server.Model.Dtos;
+using TVServiceCRM.Server.Model.Dtos.Identity;
 using TVServiceCRM.Server.Model.Models;
 
 namespace TVServiceCRM.Server.AutoMapper
@@ -16,6 +18,9 @@ namespace TVServiceCRM.Server.AutoMapper
 
             CreateMap<Ticket, TicketDto>();
             CreateMap<TicketDto, Ticket>();
+
+            CreateMap<IdentityRole, IdentityRoleDto>();
+            CreateMap<IdentityRoleDto, IdentityRole>();
         }
     }
 }

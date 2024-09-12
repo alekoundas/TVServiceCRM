@@ -3,6 +3,7 @@
     public class TokenSettings
     {
         public string Issuer { get; set; } = "";
+        public List<string> Issuers { get; set; } = new List<string>();
         public string Audience { get; set; } = "";
         public List<string> Audiences { get; set; } = new List<string>();
         public string SecretKey { get; set; } = "";

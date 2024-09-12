@@ -1,203 +1,197 @@
 import { ApiResponse } from "../model/ApiResponse";
 import { DataTableDto } from "../model/DataTableDto";
 import { UserLoginRequestDto } from "../model/UserLoginRequestDto";
-import { UserLoginResponseDto } from "../model/UserLoginResponseDto";
-import { AuthService } from "./AuthService";
+import { UserRefreshTokenDto } from "../model/UserRefreshTokenDto";
 import { LocalStorageService } from "./LocalStorageService";
 import { ToastService } from "./ToastService";
+import { TokenService } from "./TokenService";
 
-export class ApiService {
-  static serverUrl = "https://alexps.gr/api/";
-  // static serverUrl = "http://localhost:8080/api/";
-  // private static { isUserAuthenticated, login, logout } = useAuth();
+export default class ApiService {
+  // static serverUrl = "https://alexps.gr/api/";
+  static serverUrl = "http://localhost:8080/api/";
 
-  static async get<TEntity>(
+  public static async get<TEntity>(
     controller: string,
     id: number | string
   ): Promise<TEntity | null> {
-    try {
-      const url = this.serverUrl + controller + "/" + id;
-      const response = await fetch(url, {
-        method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      const responseJson = await response.json();
-
-      return responseJson;
-    } catch (error) {
-      return null;
-      console.error(error);
-    }
+    const url = this.serverUrl + controller + "/" + id;
+    return await this.apiRequest(url, "GET");
   }
 
-  static async getDataGrid<TEntity>(
+  public static async getDataGrid<TEntity>(
     controller: string,
-    dataTableDto: DataTableDto<TEntity>
+    data: DataTableDto<TEntity>
   ): Promise<DataTableDto<TEntity> | null> {
-    try {
-      dataTableDto.data = [];
-      const response = await fetch(
-        this.serverUrl + controller + "/GetDataTable",
-        {
-          method: "POST",
-          body: JSON.stringify(dataTableDto),
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      );
-      const responseJson = await response.json();
-
-      return responseJson;
-    } catch (error) {
-      return null;
-      console.error(error);
-    }
+    const url = this.serverUrl + controller + "/GetDataTable";
+    return await this.apiRequest(url, "POST", data);
   }
 
-  static async create<TEntity>(
+  public static async create<TEntity>(
     controller: string,
     data: TEntity
   ): Promise<TEntity | null> {
-    try {
-      const response = await fetch(this.serverUrl + controller, {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      const responseJson = await response.json();
-
-      return responseJson;
-    } catch (error) {
-      return null;
-      console.error(error);
-    }
+    const url = this.serverUrl + controller;
+    return await this.apiRequest(url, "POST", data);
   }
 
-  static async update<TEntity>(
+  public static async update<TEntity>(
     controller: string,
     data: TEntity,
     id: number
   ): Promise<TEntity | null> {
-    try {
-      const url = this.serverUrl + controller + "/" + id;
-
-      const response = await fetch(url, {
-        method: "PUT",
-        body: JSON.stringify(data),
-        headers: {
-          "Content-Type": "application/json",
-        },
-      });
-
-      const responseJson = await response.json();
-
-      return responseJson;
-    } catch (error) {
-      return null;
-      console.error(error);
-    }
+    const url = this.serverUrl + controller + "/" + id;
+    return await this.apiRequest(url, "PUT", data);
   }
 
-  static async login(
-    data: UserLoginRequestDto,
-    onLoginSuccess: () => void
-  ): Promise<ApiResponse<UserLoginResponseDto> | null> {
-    try {
-      const url = this.serverUrl + "users/login";
+  public static async login(data: UserLoginRequestDto, authLogin: () => void) {
+    const url = this.serverUrl + "users/login";
 
-      const response = await fetch(url, {
-        method: "POST",
-        body: JSON.stringify(data),
-        headers: {
-          "Content-Type": "application/json",
-          // accept: "text/plain",
-        },
-      });
-
-      const result: ApiResponse<UserLoginResponseDto> = await response.json();
-      if (result.isSucceed && result.data) {
+    await this.apiRequest(url, "POST", data).then((result) => {
+      if (result?.isSucceed && result.data) {
         const expireDate = new Date(new Date().getTime() + 604800 * 1000);
+
+        TokenService.setAccessToken(result.data.accessToken);
+        TokenService.setRefreshToken(result.data.refreshToken);
+        TokenService.setRefreshTokenExpireDate(expireDate.toString());
+        authLogin();
+
         ToastService.showSuccess("Login was successfull!");
-
-        AuthService.setAccessToken(result.data.accessToken);
-        AuthService.setRefreshToken(result.data.refreshToken);
-        AuthService.setRefreshTokenExpireDate(expireDate.toString());
-        onLoginSuccess();
       } else {
         ToastService.showError("Login Failed!");
       }
-
-      return result;
-    } catch (error) {
-      ToastService.showError(
-        "Something unexpected happend! API call was not successfull"
-      );
-      console.error(error);
-      return null;
-    }
+    });
   }
 
-  static async logout(
-    onLogoutSuccess: () => void
-  ): Promise<ApiResponse<UserLoginResponseDto> | null> {
-    try {
-      const token = LocalStorageService.getAccessToken();
-      const url = this.serverUrl + "users/logout";
-
-      const response = await fetch(url, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-          // accept: "text/plain",
-        },
-      });
-
-      const result: ApiResponse<UserLoginResponseDto> = await response.json();
-      if (result.isSucceed && result.data) {
+  public static async logout(authLogout: () => void) {
+    const url = this.serverUrl + "users/logout";
+    await this.apiRequest<ApiResponse<boolean>>(url, "POST").then((result) => {
+      if (result?.isSucceed && result.data) {
+        TokenService.logout();
+        authLogout();
         ToastService.showSuccess("Logout was successfull!");
-        AuthService.logout();
-        onLogoutSuccess();
       } else {
-        ToastService.showError("Login Failed!");
+        ToastService.showError("Logout Failed!");
       }
-
-      return result;
-    } catch (error) {
-      ToastService.showError(
-        "Something unexpected happend! API call was not successfull"
-      );
-      console.error(error);
-      return null;
-    }
+    });
   }
 
-  static async test<TEntity>(): Promise<TEntity | null> {
-    const token = LocalStorageService.getAccessToken();
+  public static async test<TEntity>() {
+    const url = this.serverUrl + "users/profile";
+    await this.apiRequest<TEntity>(url, "POST");
+  }
+
+  private static async apiRequest<TEntity>(
+    url: string,
+    method: string,
+    data?: TEntity
+  ): Promise<TEntity | null> {
+    let token = LocalStorageService.getAccessToken();
     try {
-      const response = await fetch(this.serverUrl + "users/profile", {
-        credentials: "include",
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
+      const result = await this.apiFetch<TEntity>(
+        url,
+        method,
+        token,
+        data
+      ).then((response) => {
+        if (response.ok) {
+          return response;
+        }
+
+        if (response.status === 401) {
+          // Refresh Token Expired!
+          if (TokenService.isRefreshTokenExpired()) {
+            ToastService.showWarn("Token expired. Login Required.");
+            TokenService.logout();
+            return null;
+          }
+
+          // Access Token Expired!
+          // Try to renew token and re-execute earlier query.
+          if (TokenService.isTokenExpired()) {
+            ToastService.showInfo("Token expired. Trying to renew.");
+            return this.refreshUserToken().then((isSuccess) => {
+              if (isSuccess) {
+                ToastService.showInfo(
+                  "Token renewed. Trying earlier query again."
+                );
+
+                token = LocalStorageService.getAccessToken();
+                return this.apiFetch(url, method, token, data);
+              }
+            });
+          }
+        }
       });
 
-      const responseJson = await response.json();
+      if (!result) {
+        ToastService.showError("Something didnt go as planned.");
+        return null;
+      }
 
+      const responseJson = await result.json();
       return responseJson;
     } catch (error) {
-      return null;
+      ToastService.showError(
+        "Something unexpected happend! API call was not successfull..."
+      );
       console.error(error);
+      return null;
     }
+  }
+
+  private static async refreshUserToken(): Promise<boolean> {
+    const url = this.serverUrl + "users/refreshToken";
+    const refreshTokenDto = TokenService.getUserRefreshTokenDto();
+    try {
+      const refreshTokenResponse = await this.apiFetch(
+        url,
+        "POST",
+        null,
+        refreshTokenDto
+      ).then((response) => {
+        if (!response.ok) {
+          return false;
+        }
+
+        const refreshTokenPromise: Promise<ApiResponse<UserRefreshTokenDto>> =
+          response.json();
+
+        return refreshTokenPromise.then((result) => {
+          if (!result.data) {
+            return false;
+          }
+
+          // authLogin();
+          TokenService.setAccessToken(result.data.accessToken);
+          TokenService.setRefreshToken(result.data.refreshToken);
+          TokenService.setRefreshTokenExpireDate(result.toString());
+          return true;
+        });
+      });
+
+      return refreshTokenResponse;
+    } catch (error) {
+      ToastService.showError(
+        "Something unexpected happend! API call was not successfull..."
+      );
+      console.error(error);
+      return false;
+    }
+  }
+
+  private static async apiFetch<TEntity>(
+    url: string,
+    method: string,
+    token?: string | null,
+    data?: TEntity | null
+  ): Promise<Response> {
+    return await fetch(url, {
+      method: method,
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(data),
+    });
   }
 }
-export default ApiService;

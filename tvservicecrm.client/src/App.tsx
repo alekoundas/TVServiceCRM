@@ -13,6 +13,8 @@ import CustomerForm from "./pages/customer/CustomerForm.tsx";
 import Tickets from "./pages/ticket/Tickets.tsx";
 import Login from "./pages/user/Login.tsx";
 import ApiService from "./services/ApiService.tsx";
+import Roles from "./pages/role/Roles.tsx";
+import RoleForm from "./pages/role/RoleForm.tsx";
 
 export default function App() {
   // Set Toast messages here
@@ -83,6 +85,23 @@ export default function App() {
                 <Route
                   path="/user/login"
                   element={<Login />}
+                />
+
+                <Route
+                  path="/user/roles"
+                  element={<Roles />}
+                />
+                <Route
+                  path="/user/roles/add"
+                  element={<RoleForm />}
+                />
+                <Route
+                  path="/user/roles/:id/edit"
+                  element={<RoleForm />}
+                />
+                <Route
+                  path="/user/roles/:id/view"
+                  element={<RoleForm />}
                 />
               </Routes>
             </ScrollPanel>

@@ -1,10 +1,7 @@
 import { Column } from "primereact/column";
-import {
-  DataTable,
-} from "primereact/datatable";
+import { DataTable } from "primereact/datatable";
 
-
-function Tickets() {
+export default function Tickets() {
   //const [products, setProducts] = useState([]);
   //const [multiSortMeta, setmultiSortMeta] = useState([]);
 
@@ -29,10 +26,8 @@ function Tickets() {
   //   refrshData();
   // }, []);
 
-
   return (
     <>
-      {" "}
       <div className="card">
         <DataTable
           lazy
@@ -62,5 +57,3 @@ function Tickets() {
     </>
   );
 }
-
-export default Tickets;
