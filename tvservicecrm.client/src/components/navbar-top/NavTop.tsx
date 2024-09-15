@@ -154,7 +154,7 @@ function NavTop() {
         label: "Login",
         icon: "pi pi-user",
         command: () => {
-          navigate("/user/login");
+          navigate("/users/login");
         },
       });
     }

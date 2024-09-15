@@ -17,7 +17,7 @@ namespace TVServiceCRM.Server.Business.Services
         private GenericRepository<ContactInformation> _contactInformations;
         private GenericRepository<Customer> _customers;
         private GenericRepository<Ticket> _tickets;
-        private GenericRepository<ApplicationUser> _users;
+        private GenericRepository<User> _users;
 
         public DataService(ApiDbContext apiDbContext)
         {
@@ -59,12 +59,12 @@ namespace TVServiceCRM.Server.Business.Services
             }
         }
 
-        public GenericRepository<ApplicationUser> Users
+        public GenericRepository<User> Users
         {
             get
             {
                 if (_tickets == null)
-                    _users = new GenericRepository<ApplicationUser>(_dbContext);
+                    _users = new GenericRepository<User>(_dbContext);
 
                 return _users;
             }

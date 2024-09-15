@@ -27,10 +27,17 @@ function NavLeft() {
           },
         },
         {
+          label: "Users",
+          icon: "pi pi-users",
+          command: () => {
+            navigate("/users");
+          },
+        },
+        {
           label: "Roles",
           icon: "pi pi-key",
           command: () => {
-            navigate("/user/roles");
+            navigate("/roles");
           },
         },
       ],

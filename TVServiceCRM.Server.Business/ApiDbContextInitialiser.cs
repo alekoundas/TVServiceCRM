@@ -11,7 +11,7 @@ namespace TVServiceCRM.Server.Business
     {
         private readonly IDataService _dataService;
         private readonly ILogger<ApiDbContextInitialiser> _logger;
-        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly UserManager<User> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ClaimsIdentity _claimsIdentity;
 
@@ -20,7 +20,7 @@ namespace TVServiceCRM.Server.Business
         public ApiDbContextInitialiser(
             IDataService dataService,
             ILogger<ApiDbContextInitialiser> logger,
-            UserManager<ApplicationUser> userManager,
+            UserManager<User> userManager,
             RoleManager<IdentityRole> roleManager,
             ClaimsIdentity claimsIdentity)
         {
@@ -117,7 +117,7 @@ namespace TVServiceCRM.Server.Business
             }
 
             // Default users
-            var administrator = new ApplicationUser { UserName = "UnifiedAppAdmin1!", Email = "UnifiedAppAdmin1!" };
+            var administrator = new User { UserName = "UnifiedAppAdmin1!", Email = "UnifiedAppAdmin1!" };
 
             if (_userManager.Users.All(u => u.UserName != administrator.UserName))
             {

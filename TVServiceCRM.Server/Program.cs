@@ -78,11 +78,11 @@ builder.Services.AddDataProtection().PersistKeysToDbContext<ApiDbContext>();
 
 
 // Add Identity.
-builder.Services.AddIdentityCore<ApplicationUser>()
+builder.Services.AddIdentityCore<User>()
                .AddRoles<IdentityRole>()
                .AddSignInManager()
                .AddEntityFrameworkStores<ApiDbContext>()
-               .AddTokenProvider<DataProtectorTokenProvider<ApplicationUser>>("REFRESHTOKENPROVIDER");
+               .AddTokenProvider<DataProtectorTokenProvider<User>>("REFRESHTOKENPROVIDER");
 
 // Configure JWT Bearer token and refresh token.
 builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>

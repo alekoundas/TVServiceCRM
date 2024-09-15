@@ -17,8 +17,8 @@ namespace TVServiceCRM.Server.Controllers
         private readonly IDataService _dataService;
         private readonly ILogger<TicketsController> _logger;
         private readonly IMapper _mapper;
-        private readonly UserManager<ApplicationUser> _userManager;
-        private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly UserManager<User> _userManager;
+        private readonly SignInManager<User> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly TokenSettings _tokenSettings;
         private readonly ClaimsIdentity _claimsIdentity;
@@ -27,8 +27,8 @@ namespace TVServiceCRM.Server.Controllers
             IDataService dataService,
             ILogger<TicketsController> logger,
             IMapper mapper,
-            UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager,
+            UserManager<User> userManager,
+            SignInManager<User> signInManager,
             RoleManager<IdentityRole> roleManager,
             ClaimsIdentity claimsIdentity,
             TokenSettings tokenSettings)

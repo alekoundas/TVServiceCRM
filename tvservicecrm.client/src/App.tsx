@@ -5,8 +5,8 @@ import { ThemeService } from "./services/ThemeService.tsx";
 import { useEffect, useRef } from "react";
 import { Toast } from "primereact/toast";
 
-import NavTop from "./components/nav_top/NavTop.tsx";
-import NavLeft from "./components/nav_left/NavLeft.tsx";
+import NavTop from "./components/navbar-top/NavTop.tsx";
+import NavLeft from "./components/navbar-left/NavLeft.tsx";
 import Home from "./pages/home/Home.tsx";
 import Customers from "./pages/customer/Customers.tsx";
 import CustomerForm from "./pages/customer/CustomerForm.tsx";
@@ -14,6 +14,7 @@ import Tickets from "./pages/ticket/Tickets.tsx";
 import Login from "./pages/user/Login.tsx";
 import ApiService from "./services/ApiService.tsx";
 import Roles from "./pages/role/Roles.tsx";
+import Users from "./pages/user/Users.tsx";
 
 export default function App() {
   // Set Toast messages here
@@ -61,6 +62,7 @@ export default function App() {
                   path="/"
                   element={<Home />}
                 />
+
                 <Route
                   path="/customers"
                   element={<Customers />}
@@ -77,17 +79,23 @@ export default function App() {
                   path="/customers/:id/view"
                   element={<CustomerForm />}
                 />
+
                 <Route
                   path="/tickets"
                   element={<Tickets />}
                 />
+
                 <Route
-                  path="/user/login"
+                  path="/users/login"
                   element={<Login />}
+                />
+                <Route
+                  path="/users"
+                  element={<Users />}
                 />
 
                 <Route
-                  path="/user/roles"
+                  path="/roles"
                   element={<Roles />}
                 />
               </Routes>
