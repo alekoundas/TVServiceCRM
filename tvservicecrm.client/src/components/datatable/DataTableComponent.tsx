@@ -2,23 +2,41 @@ import { Column, ColumnBodyOptions } from "primereact/column";
 import { DataTable, DataTableValue } from "primereact/datatable";
 import { DataTableDto } from "../../model/DataTableDto";
 import { DataTableColumns } from "../../model/datatable/DataTableColumns";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import DataTableService from "../../services/DataTableService";
 import { Button } from "primereact/button";
 import { ButtonTypeEnum } from "../../enum/ButtonTypeEnum";
+import { DataTableEditModeEnum } from "../../enum/DataTableEditModeEnum";
+import { DataTableFilterDisplayEnum } from "../../enum/DataTableFilterDisplayEnum";
 
 interface IField<TEntity> {
   controller: string;
   dataTable: DataTableDto<TEntity>;
   dataTableColumns: DataTableColumns[];
+  enableGridRowActions?: boolean;
+  enableAddAction?: boolean;
+  editMode?: DataTableEditModeEnum;
+  filterDisplay?: DataTableFilterDisplayEnum;
   onButtonClick: (buttonType: ButtonTypeEnum, rowData?: TEntity) => void;
+  onAfterDataLoaded?: (
+    data: DataTableDto<TEntity> | null
+  ) => DataTableDto<TEntity> | null;
+  triggerRefreshData?: React.MutableRefObject<(() => void) | undefined>;
+  triggerRequestData?: (data: () => TEntity[]) => void;
 }
 
 export default function DataTableComponent<TEntity extends DataTableValue>({
   controller,
   dataTable,
   dataTableColumns,
+  enableGridRowActions = false,
+  enableAddAction = false,
+  editMode,
+  filterDisplay,
   onButtonClick,
+  onAfterDataLoaded,
+  triggerRefreshData,
+  triggerRequestData,
 }: IField<TEntity>) {
   const [loading, setLoading] = useState(true);
   const [dataTableDto, setDataTableDto] =
@@ -29,12 +47,27 @@ export default function DataTableComponent<TEntity extends DataTableValue>({
     dataTableDto,
     setDataTableDto,
     setLoading,
-    null
+    null,
+    onAfterDataLoaded
   );
+  // Return data to parent.
+  if (triggerRequestData) triggerRequestData(() => dataTableDto.data);
+
+  React.useEffect(() => {
+    if (triggerRefreshData)
+      triggerRefreshData.current = dataTableService.refreshData;
+  }, [triggerRefreshData]);
+
+  React.useEffect(() => {
+    dataTableService.loadData(null);
+    console.log("loaded");
+  }, []);
 
   const getDataTableColumns = () => {
-    const canAddAction =
+    let canAddAction =
       dataTableColumns.filter((x) => x.header === "Actions").length === 0;
+
+    canAddAction = canAddAction && enableGridRowActions;
 
     if (canAddAction)
       dataTableColumns.push({
@@ -76,11 +109,6 @@ export default function DataTableComponent<TEntity extends DataTableValue>({
     </React.Fragment>
   );
 
-  useEffect(() => {
-    dataTableService.loadData(null);
-    console.log("loaded");
-  }, [location]);
-
   const renderHeader = () => {
     return (
       <div className="flex justify-content-between">
@@ -95,6 +123,19 @@ export default function DataTableComponent<TEntity extends DataTableValue>({
       </div>
     );
   };
+
+  // useEffect(() => {
+  //   dataTableService.loadData(null);
+  //   console.log("loaded");
+  // }, [location]);
+  // Method to get the current data
+
+  // Effect to trigger data request if onRequestData is provided
+  // React.useEffect(() => {
+  //   if (onRequestData) {
+  //     onRequestData(() => dataTableDto);
+  //   }
+  // }, [onRequestData]);
 
   return (
     <>
@@ -119,7 +160,7 @@ export default function DataTableComponent<TEntity extends DataTableValue>({
         }
         paginatorTemplate="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink RowsPerPageDropdown"
         // Filter.
-        filterDisplay="row"
+        filterDisplay={filterDisplay}
         filters={dataTableDto.filters}
         onFilter={dataTableService.onFilter}
         // Sort.
@@ -127,7 +168,9 @@ export default function DataTableComponent<TEntity extends DataTableValue>({
         sortMode="multiple"
         onSort={dataTableService.onSort}
         multiSortMeta={dataTableDto.multiSortMeta}
-        header={renderHeader()}
+        header={enableAddAction ? renderHeader() : null}
+        // Edit row/column.
+        editMode={editMode}
       >
         {getDataTableColumns().map((col, _i) => (
           <Column
@@ -140,6 +183,13 @@ export default function DataTableComponent<TEntity extends DataTableValue>({
             style={col.style}
             body={col.body}
             showFilterMenu={false}
+            editor={col.editor}
+            onCellEditComplete={
+              col.onCellEditComplete
+                ? col.onCellEditComplete
+                : dataTableService.onCellEditComplete
+            }
+            onCellEditInit={col.onCellEditInit}
           ></Column>
         ))}
       </DataTable>

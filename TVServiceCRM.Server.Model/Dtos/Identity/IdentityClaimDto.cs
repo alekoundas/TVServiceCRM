@@ -3,8 +3,11 @@ namespace TVServiceCRM.Server.Model.Dtos.Identity
 {
     public class IdentityClaimDto
     {
-        public string ClaimType { get; set; } = "";
-        public string ClaimValue { get; set; } = "";
+        public string Controller { get; set; } = "";
+        public bool View { get; set; }
+        public bool Add { get; set; }
+        public bool Edit { get; set; }
+        public bool Delete { get; set; }
 
     }
 }

@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json.Serialization;
 using TVServiceCRM.Server.Business;
@@ -65,6 +66,7 @@ builder.Services.AddSwaggerGen(config =>
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddDbContext<ApiDbContext>();
 builder.Services.AddScoped<ApiDbContextInitialiser>();
+builder.Services.AddSingleton<ClaimsIdentity>();
 builder.Services.AddSingleton(TimeProvider.System);
 
 // Add services.

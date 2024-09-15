@@ -42,13 +42,41 @@ namespace TVServiceCRM.Server.Controllers
             _tokenSettings = tokenSettings;
         }
 
-        // GET: api/IdentityRoles
+        // GET: api/Roles
         [HttpGet]
         public async Task<IEnumerable<IdentityRole>> GetAll()
         {
             List<IdentityRole> result = await _roleManager.Roles.ToListAsync();
             return result;
         }
+
+        // GET: api/Roles/5
+        [HttpGet("{id}")]
+        public async Task<IdentityRole?> Get(string? id)
+        {
+            if (id == null)
+                return null;
+
+            var role = await _roleManager.FindByIdAsync(id);
+
+            if (role == null)
+                return null;
+
+            return role;
+        }
+
+
+        //[HttpGet("{roleName}/claims")]
+        //public async Task<IActionResult> GetRoleClaims(string roleName)
+        //{
+        //    var role = await _roleManager.FindByNameAsync(roleName);
+        //    if (role == null)
+        //        return NotFound("Role not found");
+
+        //    var claims = await _roleManager.GetClaimsAsync(role);
+        //    return Ok(claims);
+        //}
+
 
         // POST: api/IdentityRoles/GetDataTable
         [HttpPost("GetDataTable")]
@@ -91,9 +119,9 @@ namespace TVServiceCRM.Server.Controllers
 
             // Retrieve Data.
             List<IdentityRole> result = await _dataService.Query.Roles.ToListAsync();
-                
-                
-                
+
+
+
             //    (
             //    filterQuery,
             //    orderByQuery,
@@ -115,93 +143,108 @@ namespace TVServiceCRM.Server.Controllers
 
         }
 
-        // Create a new role
+        // POST: api/Roles
         [HttpPost]
         public async Task<ApiResponse<IdentityRoleDto>> CreateRole([FromBody] IdentityRoleDto identityRoleDto)
         {
-            IdentityRole identityRole = _mapper.Map<IdentityRole>(identityRoleDto);
-            if (string.IsNullOrWhiteSpace(identityRole.Name))
+
+
+            if (string.IsNullOrWhiteSpace(identityRoleDto.Name))
                 return new ApiResponse<IdentityRoleDto>().SetErrorResponse("errors", "Role name is required");
 
 
-            var roleExists = await _roleManager.RoleExistsAsync(identityRole.Name);
+            var roleExists = await _roleManager.RoleExistsAsync(identityRoleDto.Name);
             if (roleExists)
                 return new ApiResponse<IdentityRoleDto>().SetErrorResponse("errors", "Role already exists");
 
+            IdentityRole identityRole = new IdentityRole(identityRoleDto.Name);
             var result = await _roleManager.CreateAsync(identityRole);
             if (result.Succeeded)
-                return new ApiResponse<IdentityRoleDto>().SetSuccessResponse(identityRoleDto);
-
-            return new ApiResponse<IdentityRoleDto>().SetErrorResponse("errors", result.Errors.ToString());
-        }
-
-        // Add a claim to a role
-        [HttpPost("{roleName}/claims")]
-        public async Task<ApiResponse<List<IdentityClaimDto>>> AddClaimToRole(string roleName, [FromBody] List<IdentityClaimDto> identityClaimsDto)
-        {
-            foreach (var claimDto in identityClaimsDto)
             {
-                var role = await _roleManager.FindByNameAsync(roleName);
-                if (role == null)
-                    return new ApiResponse<List<IdentityClaimDto>>().SetErrorResponse("errors", "Role not found.");
+                foreach (var item in identityRoleDto.Claims)
+                {
+                    if (item.View)
+                        await _roleManager.AddClaimAsync(identityRole, new Claim(ClaimTypes.Role, item.Controller + "_View"));
 
-                var claim = new Claim(claimDto.ClaimType, claimDto.ClaimValue);
-                var result = await _roleManager.AddClaimAsync(role, claim);
+                    if (item.Add)
+                        await _roleManager.AddClaimAsync(identityRole, new Claim(ClaimTypes.Role, item.Controller + "_Add"));
 
-                if (!result.Succeeded)
-                    return new ApiResponse<List<IdentityClaimDto>>().SetErrorResponse("errors", "Role not added.");
+                    if (item.Edit)
+                        await _roleManager.AddClaimAsync(identityRole, new Claim(ClaimTypes.Role, item.Controller + "_Edit"));
+
+                    if (item.Delete)
+                        await _roleManager.AddClaimAsync(identityRole, new Claim(ClaimTypes.Role, item.Controller + "_Delete"));
+                }
+                return new ApiResponse<IdentityRoleDto>().SetSuccessResponse(identityRoleDto);
             }
-            return new ApiResponse<List<IdentityClaimDto>>().SetSuccessResponse(identityClaimsDto);
 
+
+            return new ApiResponse<IdentityRoleDto>().SetErrorResponse("errors", result.Errors.ToString() ?? "");
         }
 
-        // Get all claims for a role
-        [HttpGet("{roleName}/claims")]
-        public async Task<IActionResult> GetRoleClaims(string roleName)
+        // PUT: api/Roles
+        [HttpPut("{id}")]
+        public async Task<ApiResponse<IdentityRoleDto>> Update(string? id, [FromBody] IdentityRoleDto identityRoleDto)
         {
-            var role = await _roleManager.FindByNameAsync(roleName);
-            if (role == null)
-                return NotFound("Role not found");
+            // Checks.
+            if (id == null || id.Count() == 0)
+                return new ApiResponse<IdentityRoleDto>().SetErrorResponse("error", "Role name not not set!");
 
-            var claims = await _roleManager.GetClaimsAsync(role);
-            return Ok(claims);
+            IdentityRole? identityRole = await _roleManager.FindByIdAsync(id);
+            if (identityRole == null)
+                return new ApiResponse<IdentityRoleDto>().SetErrorResponse("error", "Role name not found!");
+
+
+            // Get claims from role.
+            List<Claim> roleClaims = (await _roleManager.GetClaimsAsync(identityRole)).ToList();
+
+            // Get claims from form.
+            List<Claim> formClaims = new List<Claim>();
+            identityRoleDto.Claims.ForEach(identityClaimDto =>
+            {
+                if (identityClaimDto.View)
+                    formClaims.Add(new Claim(ClaimTypes.Role, identityClaimDto.Controller + "_View"));
+
+                if (identityClaimDto.Add)
+                    formClaims.Add(new Claim(ClaimTypes.Role, identityClaimDto.Controller + "_Add"));
+
+                if (identityClaimDto.Edit)
+                    formClaims.Add(new Claim(ClaimTypes.Role, identityClaimDto.Controller + "_Edit"));
+
+                if (identityClaimDto.Delete)
+                    formClaims.Add(new Claim(ClaimTypes.Role, identityClaimDto.Controller + "_Delete"));
+            });
+
+            // Get claims to delete from role, and remove them.
+            List<Claim> deleteClaims = roleClaims.Where(x => !formClaims.Any(y => x.Value == y.Value)).ToList();
+            deleteClaims.ForEach(async claim => await _roleManager.RemoveClaimAsync(identityRole, claim));
+
+            // Get claims to add in role, and add them.
+            List<Claim> addClaims = formClaims.Where(x => !roleClaims.Any(y => x.Value == y.Value)).ToList();
+            addClaims.ForEach(async claim => await _roleManager.AddClaimAsync(identityRole, claim));
+
+
+            return new ApiResponse<IdentityRoleDto>().SetSuccessResponse(identityRoleDto);
         }
 
-        // Remove a claim from a role
-        //[HttpDelete("{roleName}/claims")]
-        //public async Task<IActionResult> RemoveClaimFromRole(string roleName, [FromBody] ClaimModel model)
-        //{
-        //    var role = await _roleManager.FindByNameAsync(roleName);
-        //    if (role == null)
-        //        return NotFound("Role not found");
 
-        //    var claim = new Claim(model.ClaimType, model.ClaimValue);
-        //    var result = await _roleManager.RemoveClaimAsync(role, claim);
-
-        //    if (result.Succeeded)
-        //        return Ok($"Claim removed from role {roleName} successfully");
-
-        //    return BadRequest(result.Errors);
-        //}
-
-
-        // Delete a role
-        [HttpDelete("{roleName}")]
-        public async Task<IActionResult> DeleteRole(string roleName)
+        // DELETE: api/Roles/5
+        [HttpDelete("{id}")]
+        public async Task<ApiResponse<IdentityRoleDto>> DeleteRole(string? id)
         {
-            var role = await _roleManager.FindByNameAsync(roleName);
+            if (id == null || id.Count() == 0)
+                return new ApiResponse<IdentityRoleDto>().SetErrorResponse("error", "Role name not not set!");
+
+            var role = await _roleManager.FindByIdAsync(id);
             if (role == null)
-                return NotFound("Role not found");
+                return new ApiResponse<IdentityRoleDto>().SetErrorResponse("error", "Role not found!");
+
 
             var result = await _roleManager.DeleteAsync(role);
             if (result.Succeeded)
-                return Ok($"Role {roleName} deleted successfully");
+                return new ApiResponse<IdentityRoleDto>().SetSuccessResponse("success", $"Role {role.Name} deleted successfully");
 
-            return BadRequest(result.Errors);
+            return new ApiResponse<IdentityRoleDto>().SetErrorResponse("error", result.Errors.ToString() ?? "");
         }
-
-
-
     }
-
 }

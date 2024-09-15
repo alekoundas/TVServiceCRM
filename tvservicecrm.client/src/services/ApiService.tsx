@@ -34,10 +34,18 @@ export default class ApiService {
     return await this.apiRequest(url, "POST", data);
   }
 
+  public static async delete<TEntity>(
+    controller: string,
+    id: number | string
+  ): Promise<TEntity | null> {
+    const url = this.serverUrl + controller + "/" + id;
+    return await this.apiRequest(url, "DELETE");
+  }
+
   public static async update<TEntity>(
     controller: string,
     data: TEntity,
-    id: number
+    id: number | string
   ): Promise<TEntity | null> {
     const url = this.serverUrl + controller + "/" + id;
     return await this.apiRequest(url, "PUT", data);

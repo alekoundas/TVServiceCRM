@@ -4,18 +4,18 @@ import { Dialog } from "primereact/dialog";
 
 interface IField {
   children: ReactNode;
-  onParentVisibilityUpdate: (callback: (value: boolean) => void) => void;
+  triggerDialogVisibility: (callback: (value: boolean) => void) => void;
 }
 
 export default function ViewDialogComponent({
   children,
-  onParentVisibilityUpdate,
+  triggerDialogVisibility,
 }: IField) {
   const [isVisible, setIsVisible] = useState(false);
 
   React.useEffect(() => {
-    onParentVisibilityUpdate((newValue: boolean) => setIsVisible(newValue));
-  }, [onParentVisibilityUpdate]);
+    triggerDialogVisibility((newValue: boolean) => setIsVisible(newValue));
+  }, [triggerDialogVisibility]);
 
   const dialogFooter = () => (
     <React.Fragment>
@@ -32,7 +32,7 @@ export default function ViewDialogComponent({
     <>
       <Dialog
         visible={isVisible}
-        style={{ width: "35%" }}
+        style={{ width: "50%" }}
         header="View"
         modal
         className="p-fluid"

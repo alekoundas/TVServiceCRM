@@ -1,22 +1,30 @@
 import React, { useState } from "react";
 import { Button } from "primereact/button";
-import { ButtonTypeEnum } from "../../enum/ButtonTypeEnum";
 import { Dialog } from "primereact/dialog";
+import ApiService from "../../services/ApiService";
 
 interface IField {
-  onButtonClick: (buttonType: ButtonTypeEnum) => void;
-  onParentVisibilityUpdate: (callback: (value: boolean) => void) => void;
+  id: string;
+  name: string;
+  onAfterRowDeletion: () => void;
+  triggerDialogVisibility: (callback: (value: boolean) => void) => void;
 }
 
 export default function DeleteDialogComponent({
-  onButtonClick,
-  onParentVisibilityUpdate,
+  id,
+  name,
+  onAfterRowDeletion,
+  triggerDialogVisibility,
 }: IField) {
   const [isVisible, setIsVisible] = useState(false);
 
+  const onDelete = () => {
+    ApiService.delete("roles", id).then(() => onAfterRowDeletion());
+  };
+
   React.useEffect(() => {
-    onParentVisibilityUpdate((visibility: boolean) => setIsVisible(visibility));
-  }, [onParentVisibilityUpdate]);
+    triggerDialogVisibility((visibility: boolean) => setIsVisible(visibility));
+  }, [triggerDialogVisibility]);
 
   const dialogFooter = () => (
     <React.Fragment>
@@ -29,7 +37,7 @@ export default function DeleteDialogComponent({
       <Button
         label="Delete"
         icon="pi pi-trash"
-        onClick={() => onButtonClick(ButtonTypeEnum.DELETE)}
+        onClick={onDelete}
       />
     </React.Fragment>
   );
@@ -50,7 +58,7 @@ export default function DeleteDialogComponent({
             className="pi pi-exclamation-triangle mr-3"
             style={{ fontSize: "2rem" }}
           />
-          <span>Are you sure you want to delete ?</span>
+          <span>Are you sure you want to delete {name}?</span>
         </div>
       </Dialog>
     </>

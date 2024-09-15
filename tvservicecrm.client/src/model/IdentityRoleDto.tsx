@@ -1,14 +1,18 @@
-export class IdentityRoleDto {
-  id: number = 0;
-  name: string = "";
-  normalizedName: string = "";
-  claims: string[] = [];
-}
+import { ClaimDto } from "./ClaimDto";
 
 export interface IdentityRoleDto {
   [key: string]: any;
-  id: number;
+  id: string;
   name: string;
   normalizedName: string;
-  claims: string[];
+  concurrencyStamp: string;
+  claims: ClaimDto[];
+}
+
+export class IdentityRoleDto {
+  id: string = "";
+  name: string = "";
+  normalizedName: string = "";
+  concurrencyStamp: string = "";
+  claims: ClaimDto[] = [];
 }

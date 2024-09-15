@@ -1,3 +1,4 @@
+import { useRef, useState } from "react";
 import DataTableComponent from "../../components/datatable/DataTableComponent";
 import DeleteDialogComponent from "../../components/dialog/DeleteDialogComponent";
 import EditDialogComponent from "../../components/dialog/EditDialogComponent";
@@ -8,11 +9,20 @@ import { DataTableColumns } from "../../model/datatable/DataTableColumns";
 import { DataTableDto } from "../../model/DataTableDto";
 import { IdentityRoleDto } from "../../model/IdentityRoleDto";
 import RoleForm from "./RoleForm";
+import { DataTableFilterDisplayEnum } from "../../enum/DataTableFilterDisplayEnum";
+import AddDialogComponent from "../../components/dialog/AddDialogComponent";
 
 export default function Roles() {
+  const [roleName, setRoleName] = useState("");
+  const [roleId, setRoleId] = useState("");
+
   let setDeleteDialogVisibility: (newValue: boolean) => void = () => {};
   let setEditDialogVisibility: (newValue: boolean) => void = () => {};
   let setViewDialogVisibility: (newValue: boolean) => void = () => {};
+  let setAddDialogVisibility: (newValue: boolean) => void = () => {};
+  let setSaveDisable: (newValue: boolean) => void = () => {};
+  let triggerFormSave: () => void = () => {};
+  const onRefreshDataTable = useRef<(() => void) | undefined>(undefined);
 
   const formMode: FormMode = window.location.href.endsWith("/add")
     ? FormMode.ADD
@@ -59,15 +69,26 @@ export default function Roles() {
     buttonType: ButtonTypeEnum,
     rowData?: IdentityRoleDto
   ) => {
+    setRoleName(rowData?.name ?? "");
+    setRoleId(rowData?.id ?? "");
     switch (buttonType) {
+      case ButtonTypeEnum.VIEW:
+        setViewDialogVisibility(true);
+        break;
+      case ButtonTypeEnum.ADD:
+        setAddDialogVisibility(true);
+        break;
       case ButtonTypeEnum.EDIT:
         setEditDialogVisibility(true);
         break;
       case ButtonTypeEnum.DELETE:
         setDeleteDialogVisibility(true);
         break;
-      case ButtonTypeEnum.VIEW:
-        setViewDialogVisibility(true);
+      case ButtonTypeEnum.SAVE:
+        triggerFormSave();
+        setAddDialogVisibility(false);
+        setEditDialogVisibility(false);
+        if (onRefreshDataTable.current) onRefreshDataTable.current();
         break;
 
       default:
@@ -78,13 +99,18 @@ export default function Roles() {
     console.log(buttonType);
   };
 
-  const onDialogClick = (
-    buttonType: ButtonTypeEnum,
-    rowData?: IdentityRoleDto
-  ) => {
-    console.log(rowData);
-    console.log(buttonType);
+  const afterSave = () => {
+    if (onRefreshDataTable.current) onRefreshDataTable.current();
     setDeleteDialogVisibility(false);
+  };
+
+  // Link onSave event button to form Save function.
+  const [triger, settriger] = useState(0);
+  let triggerSave = () => {
+    settriger(triger + 1);
+    triggerFormSave();
+    setAddDialogVisibility(false);
+    setEditDialogVisibility(false);
   };
 
   return (
@@ -93,26 +119,70 @@ export default function Roles() {
         <DataTableComponent
           onButtonClick={onDataTableClick}
           controller="roles"
+          enableGridRowActions={true}
+          filterDisplay={DataTableFilterDisplayEnum.ROW}
+          enableAddAction={true}
           dataTable={datatableDto}
           dataTableColumns={dataTableColumns}
+          triggerRefreshData={onRefreshDataTable}
         />
       </div>
 
+      {/* Delete Modal */}
       <DeleteDialogComponent
-        onParentVisibilityUpdate={(fn) => (setDeleteDialogVisibility = fn)}
-        onButtonClick={onDialogClick}
+        onAfterRowDeletion={afterSave}
+        triggerDialogVisibility={(fn) => (setDeleteDialogVisibility = fn)}
+        id={roleId}
+        name={roleName}
       />
+
+      {/* View Modal */}
       <ViewDialogComponent
-        onParentVisibilityUpdate={(fn) => (setViewDialogVisibility = fn)}
+        triggerDialogVisibility={(fn) => (setViewDialogVisibility = fn)}
       >
-        <RoleForm />
+        <RoleForm
+          id={roleId}
+          formMode={FormMode.VIEW}
+          roleName={roleName}
+          onAfterSave={afterSave}
+        />
       </ViewDialogComponent>
+
+      {/* Edit Modal */}
       <EditDialogComponent
-        onButtonClick={onDialogClick}
-        onParentVisibilityUpdate={(fn) => (setEditDialogVisibility = fn)}
+        onSaveButtonClick={triggerSave}
+        triggerDialogVisibility={(fn) => (setEditDialogVisibility = fn)}
+        triggerSaveDisable={(fn) => (setSaveDisable = fn)}
+        triggerSaveEnable={(fn) => (setSaveDisable = fn)}
       >
-        <RoleForm />
+        <RoleForm
+          id={roleId}
+          formMode={FormMode.EDIT}
+          roleName={roleName}
+          onAfterSave={afterSave}
+          onDisableSaveButton={() => setSaveDisable(false)}
+          onEnableSaveButton={() => setSaveDisable(true)}
+          triggerSaveForm={triggerFormSave}
+        />
       </EditDialogComponent>
+
+      {/* Add Modal */}
+      <AddDialogComponent
+        onSaveButtonClick={triggerSave}
+        triggerDialogVisibility={(fn) => (setAddDialogVisibility = fn)}
+        triggerSaveDisable={(fn) => (setSaveDisable = fn)}
+        triggerSaveEnable={(fn) => (setSaveDisable = fn)}
+      >
+        <RoleForm
+          id={roleId}
+          formMode={FormMode.ADD}
+          roleName={roleName}
+          onAfterSave={afterSave}
+          onDisableSaveButton={() => setSaveDisable(false)}
+          onEnableSaveButton={() => setSaveDisable(true)}
+          triggerSaveForm={triggerFormSave}
+        />
+      </AddDialogComponent>
     </>
   );
 }

@@ -13,6 +13,7 @@ namespace TVServiceCRM.Server.Business
         private readonly ILogger<ApiDbContextInitialiser> _logger;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
+        private readonly ClaimsIdentity _claimsIdentity;
 
 
 
@@ -20,30 +21,15 @@ namespace TVServiceCRM.Server.Business
             IDataService dataService,
             ILogger<ApiDbContextInitialiser> logger,
             UserManager<ApplicationUser> userManager,
-            RoleManager<IdentityRole> roleManager)
+            RoleManager<IdentityRole> roleManager,
+            ClaimsIdentity claimsIdentity)
         {
             _dataService = dataService;
             _logger = logger;
             _userManager = userManager;
             _roleManager = roleManager;
+            _claimsIdentity = claimsIdentity;
         }
-
-
-        //public async Task InitialiseAsync()
-        //{
-        //    try
-        //    {
-        //        if (_dataService.Database.IsSqlServer())
-        //        {
-        //            await _context.Database.MigrateAsync();
-        //        }
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        _logger.LogError(ex, "An error occurred while initialising the database.");
-        //        throw;
-        //    }
-        //}
 
         public async Task RunMigrationsAsync()
         {
@@ -64,6 +50,7 @@ namespace TVServiceCRM.Server.Business
         {
             try
             {
+                TrySeedClaimsAsync();
                 await TrySeedAsync();
             }
             catch (Exception ex)
@@ -71,6 +58,30 @@ namespace TVServiceCRM.Server.Business
                 _logger.LogError(ex, "An error occurred while seeding the database.");
                 throw;
             }
+        }
+
+        private void TrySeedClaimsAsync()
+        {
+                _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Customer_View"));
+                _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Customer_Add"));
+                _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Customer_Edit"));
+                _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Customer_Delete"));
+
+                _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Ticket_View"));
+                _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Ticket_Add"));
+                _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Ticket_Edit"));
+                _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Ticket_Delete"));
+
+                _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "ContactInformation_View"));
+                _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "ContactInformation_Add"));
+                _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "ContactInformation_Edit"));
+                _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "ContactInformation_Delete"));
+
+                _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Role_View"));
+                _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Role_Add"));
+                _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Role_Edit"));
+                _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Role_Delete"));
+
         }
 
         private async Task TrySeedAsync()
@@ -83,15 +94,30 @@ namespace TVServiceCRM.Server.Business
                 var role = await _roleManager.CreateAsync(administratorRole);
                 if (role != null)
                 {
-                    await _roleManager.AddClaimAsync(administratorRole, new Claim("RoleClaim", "HasRoleView"));
-                    await _roleManager.AddClaimAsync(administratorRole, new Claim("RoleClaim", "HasRoleAdd"));
-                    await _roleManager.AddClaimAsync(administratorRole, new Claim("RoleClaim", "HasRoleEdit"));
-                    await _roleManager.AddClaimAsync(administratorRole, new Claim("RoleClaim", "HasRoleDelete"));
+                    await _roleManager.AddClaimAsync(administratorRole, _claimsIdentity.Claims.First(x=>x.Value== "Customer_View"));
+                    await _roleManager.AddClaimAsync(administratorRole, _claimsIdentity.Claims.First(x=>x.Value== "Customer_Add"));
+                    await _roleManager.AddClaimAsync(administratorRole, _claimsIdentity.Claims.First(x=>x.Value== "Customer_Edit"));
+                    await _roleManager.AddClaimAsync(administratorRole, _claimsIdentity.Claims.First(x=>x.Value== "Customer_Delete"));
+
+                    await _roleManager.AddClaimAsync(administratorRole, _claimsIdentity.Claims.First(x => x.Value == "Ticket_View"));
+                    await _roleManager.AddClaimAsync(administratorRole, _claimsIdentity.Claims.First(x => x.Value == "Ticket_Add"));
+                    await _roleManager.AddClaimAsync(administratorRole, _claimsIdentity.Claims.First(x => x.Value == "Ticket_Edit"));
+                    await _roleManager.AddClaimAsync(administratorRole, _claimsIdentity.Claims.First(x => x.Value == "Ticket_Delete"));
+
+                    await _roleManager.AddClaimAsync(administratorRole, _claimsIdentity.Claims.First(x => x.Value == "ContactInformation_View"));
+                    await _roleManager.AddClaimAsync(administratorRole, _claimsIdentity.Claims.First(x => x.Value == "ContactInformation_Add"));
+                    await _roleManager.AddClaimAsync(administratorRole, _claimsIdentity.Claims.First(x => x.Value == "ContactInformation_Edit"));
+                    await _roleManager.AddClaimAsync(administratorRole, _claimsIdentity.Claims.First(x => x.Value == "ContactInformation_Delete"));
+
+                    await _roleManager.AddClaimAsync(administratorRole, _claimsIdentity.Claims.First(x => x.Value == "Role_View"));
+                    await _roleManager.AddClaimAsync(administratorRole, _claimsIdentity.Claims.First(x => x.Value == "Role_Add"));
+                    await _roleManager.AddClaimAsync(administratorRole, _claimsIdentity.Claims.First(x => x.Value == "Role_Edit"));
+                    await _roleManager.AddClaimAsync(administratorRole, _claimsIdentity.Claims.First(x => x.Value == "Role_Delete"));
                 }
             }
 
             // Default users
-            var administrator = new ApplicationUser { UserName = "UnifiedAppAdmin", Email = "UnifiedAppAdmin" };
+            var administrator = new ApplicationUser { UserName = "UnifiedAppAdmin1!", Email = "UnifiedAppAdmin1!" };
 
             if (_userManager.Users.All(u => u.UserName != administrator.UserName))
             {

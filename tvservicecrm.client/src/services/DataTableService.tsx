@@ -5,26 +5,34 @@ import {
 } from "primereact/datatable";
 import { DataTableDto } from "../model/DataTableDto";
 import ApiService from "./ApiService";
+import { ColumnEvent } from "primereact/column";
 
-export class DataTableService<TEntity> {
+export default class DataTableService<TEntity> {
   private dataTableDto: DataTableDto<TEntity>;
   private setDataTableDto: any;
   private setLoading: any;
   private controller: string;
   private defaultUrlSearchQuery: string | null = null;
+  private afterDataLoaded?: (
+    data: DataTableDto<TEntity> | null
+  ) => DataTableDto<TEntity> | null;
 
   public constructor(
     controller: string,
     dataTableDto: DataTableDto<TEntity>,
     setDataTableDto: any,
     setLoading: any,
-    defaultUrlSearchQuery: string | null
+    defaultUrlSearchQuery: string | null,
+    afterDataLoaded?: (
+      data: DataTableDto<TEntity> | null
+    ) => DataTableDto<TEntity> | null
   ) {
     this.controller = controller;
     this.dataTableDto = dataTableDto;
     this.setDataTableDto = setDataTableDto;
     this.setLoading = setLoading;
     this.defaultUrlSearchQuery = defaultUrlSearchQuery;
+    this.afterDataLoaded = afterDataLoaded;
   }
 
   public loadData = (urlQuery: string | null) => {
@@ -63,17 +71,28 @@ export class DataTableService<TEntity> {
     this.refreshData();
   };
 
-  private refreshData = async (): Promise<DataTableDto<TEntity> | null> => {
+  public onCellEditComplete = (e: ColumnEvent) => {
+    // let { rowData, newValue, field } = e;
+    let { rowData, newValue, field, originalEvent: event } = e;
+    rowData[field] = newValue;
+    event.preventDefault();
+    // if (this.onRequestData) this.onRequestData({ ...this.dataTableDto });
+  };
+
+  public refreshData = async (): Promise<DataTableDto<TEntity> | null> => {
     this.setLoading(true);
     return await ApiService.getDataGrid<TEntity>(
       this.controller,
       this.dataTableDto
-    ).then((response) => {
-      if (response) this.setDataTableDto({ ...response });
-      if (this.defaultUrlSearchQuery) this.setUrlSearchQuery(response);
-      this.setLoading(false);
-      return response;
-    });
+    )
+      .then(this.afterDataLoaded)
+      .then((response) => {
+        if (response) this.setDataTableDto({ ...response });
+        if (this.defaultUrlSearchQuery) this.setUrlSearchQuery(response);
+        this.setLoading(false);
+        // if (this.onRequestData) this.onRequestData({ ...response });
+        return response;
+      });
   };
 
   private setUrlSearchQuery = (response: DataTableDto<TEntity> | null) => {
@@ -92,4 +111,3 @@ export class DataTableService<TEntity> {
     }
   };
 }
-export default DataTableService;

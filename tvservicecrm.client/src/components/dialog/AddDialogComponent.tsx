@@ -10,9 +10,8 @@ interface IField {
   triggerSaveEnable: (callback: (value: boolean) => void) => void;
 }
 
-export default function EditDialogComponent({
+export default function AddDialogComponent({
   children,
-
   onSaveButtonClick,
   triggerDialogVisibility,
   triggerSaveDisable,
@@ -51,7 +50,7 @@ export default function EditDialogComponent({
       <Dialog
         visible={isVisible}
         style={{ width: "45%" }}
-        header="Edit"
+        header="Add"
         modal
         className="p-fluid"
         footer={dialogFooter()}
