@@ -174,6 +174,16 @@ namespace TVServiceCRM.Server.Business.Repository
             return await _set.Where(filter).ToListAsync();
         }
 
+        // Save.
+        public async Task<int> SaveChangesAsync()
+        {
+            return await Context.SaveChangesAsync();
+        }
+        public int SaveChanges()
+        {
+            return Context.SaveChanges();
+        }
+
 
         //// Dispose.
         //private bool disposed = false;

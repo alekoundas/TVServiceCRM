@@ -22,8 +22,8 @@ namespace TVServiceCRM.Server.AutoMapper
             CreateMap<IdentityRole, IdentityRoleDto>();
             CreateMap<IdentityRoleDto, IdentityRole>();
 
-            CreateMap<User, UserDto>();
-            CreateMap<UserDto, User>();
+            CreateMap<ApplicationUser, UserDto>();
+            CreateMap<UserDto, ApplicationUser>();
         }
     }
 }

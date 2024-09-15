@@ -1,4 +1,5 @@
-﻿using TVServiceCRM.Server.Business.IServices;
+﻿using Microsoft.EntityFrameworkCore;
+using TVServiceCRM.Server.Business.IServices;
 using TVServiceCRM.Server.Business.Repository;
 using TVServiceCRM.Server.DataAccess;
 using TVServiceCRM.Server.Model.Models;
@@ -8,7 +9,7 @@ namespace TVServiceCRM.Server.Business.Services
     /// <summary>
     /// Unit of work design pattern.
     /// </summary>
-    public class DataService : IDataService, IDisposable
+    public class DataService : IDataService, IDisposable 
     {
         public ApiDbContext Query { get; }
         private ApiDbContext _dbContext { get; }
@@ -17,7 +18,7 @@ namespace TVServiceCRM.Server.Business.Services
         private GenericRepository<ContactInformation> _contactInformations;
         private GenericRepository<Customer> _customers;
         private GenericRepository<Ticket> _tickets;
-        private GenericRepository<User> _users;
+        private GenericRepository<ApplicationUser> _users;
 
         public DataService(ApiDbContext apiDbContext)
         {
@@ -59,18 +60,23 @@ namespace TVServiceCRM.Server.Business.Services
             }
         }
 
-        public GenericRepository<User> Users
+        public GenericRepository<ApplicationUser> Users
         {
             get
             {
                 if (_tickets == null)
-                    _users = new GenericRepository<User>(_dbContext);
+                    _users = new GenericRepository<ApplicationUser>(_dbContext);
 
                 return _users;
             }
         }
 
 
+
+        public GenericRepository<TEntity> GetGenericRepository<TEntity >() where TEntity : class
+        {
+            return new GenericRepository<TEntity>(_dbContext);
+        }
 
         public async Task<int> SaveChangesAsync()
         {

@@ -8,19 +8,18 @@ using TVServiceCRM.Server.Model.Dtos;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore;
-using TVServiceCRM.Server.Model.Dtos.Identity;
 
 namespace TVServiceCRM.Server.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class CustomersController : ControllerBase
+    public class CustomersController : GenericController<Customer, CustomersController>
     {
         private readonly IDataService _dataService;
         private readonly IMapper _mapper;
         private readonly ILogger<CustomersController> _logger;
 
-        public CustomersController(ILogger<CustomersController> logger, IDataService dataService, IMapper mapper)
+        public CustomersController(IDataService dataService, ILogger<CustomersController> logger, IMapper mapper) : base(dataService, logger)
         {
             _logger = logger;
             _dataService = dataService;
@@ -105,22 +104,22 @@ namespace TVServiceCRM.Server.Controllers
 
 
         // GET: api/Customers/5
-        [HttpGet("{id}")]
-        public async Task<Customer?> Get(int? id)
-        {
-            if (id == null)
-                return null;
+        //[HttpGet("{id}")]
+        //public async Task<Customer?> Get(int? id)
+        //{
+        //    if (id == null)
+        //        return null;
 
-            Customer? customer = await _dataService.Query.Customers
-                .Include(x=>x.ContactInformations)
-                .Include(x=>x.Tickets)
-                .FirstOrDefaultAsync(m => m.Id == id);
+        //    Customer? customer = await _dataService.Query.Customers
+        //        .Include(x=>x.ContactInformations)
+        //        .Include(x=>x.Tickets)
+        //        .FirstOrDefaultAsync(m => m.Id == id);
 
-            if (customer == null)
-                return null;
+        //    if (customer == null)
+        //        return null;
 
-            return customer;
-        }
+        //    return customer;
+        //}
 
         // POST: api/Customers
         // To protect from overposting attacks, enable the specific properties you want to bind to.
@@ -200,20 +199,20 @@ namespace TVServiceCRM.Server.Controllers
         }
 
         // DELETE: api/Customers/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteCustomer(int id)
-        {
-            var customer = await _dataService.Customers.FindByIdAsync(id);
-            if (customer == null)
-            {
-                return NotFound();
-            }
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> DeleteCustomer(int id)
+        //{
+        //    var customer = await _dataService.Customers.FindByIdAsync(id);
+        //    if (customer == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            _dataService.Customers.Remove(customer);
-            await _dataService.SaveChangesAsync();
+        //    _dataService.Customers.Remove(customer);
+        //    await _dataService.SaveChangesAsync();
 
-            return NoContent();
-        }
+        //    return NoContent();
+        //}
 
         private bool CustomerExists(int id)
         {

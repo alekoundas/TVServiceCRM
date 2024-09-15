@@ -19,8 +19,8 @@ namespace TVServiceCRM.Server.Controllers
         private readonly IDataService _dataService;
         private readonly ILogger<TicketsController> _logger;
         private readonly IMapper _mapper;
-        private readonly UserManager<User> _userManager;
-        private readonly SignInManager<User> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly TokenSettings _tokenSettings;
 
@@ -28,8 +28,8 @@ namespace TVServiceCRM.Server.Controllers
             IDataService dataService,
             ILogger<TicketsController> logger,
             IMapper mapper,
-            UserManager<User> userManager,
-            SignInManager<User> signInManager,
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
             RoleManager<IdentityRole> roleManager,
             TokenSettings tokenSettings)
         {
@@ -57,7 +57,7 @@ namespace TVServiceCRM.Server.Controllers
             if (id == null)
                 return new ApiResponse<IdentityRoleDto>().SetErrorResponse("errors", "Role ID not set!");
 
-            IdentityRole role = await _roleManager.FindByIdAsync(id);
+            IdentityRole? role = await _roleManager.FindByIdAsync(id);
             if (role == null)
                 return new ApiResponse<IdentityRoleDto>().SetErrorResponse("errors", "Role not found!");
 

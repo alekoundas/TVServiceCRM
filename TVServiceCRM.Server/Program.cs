@@ -10,6 +10,7 @@ using System.Text.Json.Serialization;
 using TVServiceCRM.Server.Business;
 using TVServiceCRM.Server.Business.IServices;
 using TVServiceCRM.Server.Business.Services;
+using TVServiceCRM.Server.Controllers;
 using TVServiceCRM.Server.DataAccess;
 using TVServiceCRM.Server.Model.Models;
 using TVServiceCRM.Server.Model.System;
@@ -78,11 +79,11 @@ builder.Services.AddDataProtection().PersistKeysToDbContext<ApiDbContext>();
 
 
 // Add Identity.
-builder.Services.AddIdentityCore<User>()
+builder.Services.AddIdentityCore<ApplicationUser>()
                .AddRoles<IdentityRole>()
                .AddSignInManager()
                .AddEntityFrameworkStores<ApiDbContext>()
-               .AddTokenProvider<DataProtectorTokenProvider<User>>("REFRESHTOKENPROVIDER");
+               .AddTokenProvider<DataProtectorTokenProvider<ApplicationUser>>("REFRESHTOKENPROVIDER");
 
 // Configure JWT Bearer token and refresh token.
 builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>

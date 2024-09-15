@@ -6,8 +6,8 @@ import { ToastService } from "./ToastService";
 import { TokenService } from "./TokenService";
 
 export default class ApiService {
-  // static serverUrl = "https://alexps.gr/api/";
-  static serverUrl = "http://localhost:8080/api/";
+  static serverUrl = "https://alexps.gr/api/";
+  // static serverUrl = "http://localhost:8080/api/";
 
   public static async get<TEntity>(
     controller: string,
@@ -54,11 +54,11 @@ export default class ApiService {
     const url = this.serverUrl + "users/login";
 
     await this.apiRequest(url, "POST", data).then((result) => {
-      if (result?.isSucceed && result.data) {
+      if (result) {
         const expireDate = new Date(new Date().getTime() + 604800 * 1000);
 
-        TokenService.setAccessToken(result.data.accessToken);
-        TokenService.setRefreshToken(result.data.refreshToken);
+        TokenService.setAccessToken(result.accessToken);
+        TokenService.setRefreshToken(result.refreshToken);
         TokenService.setRefreshTokenExpireDate(expireDate.toString());
         authLogin();
 
@@ -72,7 +72,7 @@ export default class ApiService {
   public static async logout(authLogout: () => void) {
     const url = this.serverUrl + "users/logout";
     await this.apiRequest<ApiResponse<boolean>>(url, "POST").then((result) => {
-      if (result?.isSucceed && result.data) {
+      if (result) {
         TokenService.logout();
         authLogout();
         ToastService.showSuccess("Logout was successfull!");
@@ -83,8 +83,11 @@ export default class ApiService {
   }
 
   public static async test<TEntity>() {
-    const url = this.serverUrl + "users/profile";
+    let url = this.serverUrl + "users/profile";
     await this.apiRequest<TEntity>(url, "POST");
+
+    url = this.serverUrl + "tickets/5";
+    await this.apiRequest<TEntity>(url, "GET");
   }
 
   private static async apiRequest<TEntity>(

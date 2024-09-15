@@ -11,7 +11,7 @@ namespace TVServiceCRM.Server.Business
     {
         private readonly IDataService _dataService;
         private readonly ILogger<ApiDbContextInitialiser> _logger;
-        private readonly UserManager<User> _userManager;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly ClaimsIdentity _claimsIdentity;
 
@@ -20,7 +20,7 @@ namespace TVServiceCRM.Server.Business
         public ApiDbContextInitialiser(
             IDataService dataService,
             ILogger<ApiDbContextInitialiser> logger,
-            UserManager<User> userManager,
+            UserManager<ApplicationUser> userManager,
             RoleManager<IdentityRole> roleManager,
             ClaimsIdentity claimsIdentity)
         {
@@ -62,30 +62,30 @@ namespace TVServiceCRM.Server.Business
 
         private void TrySeedClaimsAsync()
         {
-            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Customer_View"));
-            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Customer_Add"));
-            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Customer_Edit"));
-            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Customer_Delete"));
+            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Customers_View"));
+            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Customers_Add"));
+            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Customers_Edit"));
+            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Customers_Delete"));
 
-            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Ticket_View"));
-            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Ticket_Add"));
-            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Ticket_Edit"));
-            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Ticket_Delete"));
+            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Tickets_View"));
+            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Tickets_Add"));
+            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Tickets_Edit"));
+            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Tickets_Delete"));
 
-            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "ContactInformation_View"));
-            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "ContactInformation_Add"));
-            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "ContactInformation_Edit"));
-            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "ContactInformation_Delete"));
+            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "ContactInformations_View"));
+            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "ContactInformations_Add"));
+            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "ContactInformations_Edit"));
+            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "ContactInformations_Delete"));
 
-            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Role_View"));
-            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Role_Add"));
-            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Role_Edit"));
-            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Role_Delete"));
+            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Roles_View"));
+            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Roles_Add"));
+            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Roles_Edit"));
+            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Roles_Delete"));
 
-            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "User_View"));
-            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "User_Add"));
-            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "User_Edit"));
-            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "User_Delete"));
+            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Users_View"));
+            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Users_Add"));
+            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Users_Edit"));
+            _claimsIdentity.AddClaim(new Claim(ClaimTypes.Role, "Users_Delete"));
 
         }
 
@@ -129,7 +129,7 @@ namespace TVServiceCRM.Server.Business
             }
 
             // Default users
-            var administrator = new User { UserName = "Admin", Email = "Admin@Admin.Admin" };
+            var administrator = new ApplicationUser { UserName = "Admin", Email = "Admin@Admin.Admin" };
 
             if (_userManager.Users.All(u => u.UserName != administrator.UserName))
             {

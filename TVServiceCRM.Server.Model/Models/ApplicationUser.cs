@@ -2,7 +2,7 @@
 
 namespace TVServiceCRM.Server.Model.Models
 {
-    public class User : IdentityUser
+    public class ApplicationUser : IdentityUser
     {
         public string RoleId { get; set; } = "";
     }

@@ -23,8 +23,8 @@ namespace TVServiceCRM.Server.Controllers
         private readonly IDataService _dataService;
         private readonly IMapper _mapper;
         private readonly ILogger<TicketsController> _logger;
-        private readonly UserManager<User> _userManager;
-        private readonly SignInManager<User> _signInManager;
+        private readonly UserManager<ApplicationUser> _userManager;
+        private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly RoleManager<IdentityRole> _roleManager;
         private readonly TokenSettings _tokenSettings;
 
@@ -32,8 +32,8 @@ namespace TVServiceCRM.Server.Controllers
             IDataService dataService,
             IMapper mapper,
             ILogger<TicketsController> logger,
-            UserManager<User> userManager,
-            SignInManager<User> signInManager,
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager,
             RoleManager<IdentityRole> roleManager,
             TokenSettings tokenSettings)
         {
@@ -49,16 +49,16 @@ namespace TVServiceCRM.Server.Controllers
 
         // GET: api/Users/5
         [HttpGet("{id}")]
-        public async Task<ApiResponse<User>> Get(string? id)
+        public async Task<ApiResponse<ApplicationUser>> Get(string? id)
         {
             if (id == null)
-                return new ApiResponse<User>().SetErrorResponse("errors", "Role ID not set!");
+                return new ApiResponse<ApplicationUser>().SetErrorResponse("errors", "Role ID not set!");
 
-            User? applicationUser = await _userManager.FindByIdAsync(id);
+            ApplicationUser? applicationUser = await _userManager.FindByIdAsync(id);
             if (applicationUser == null)
-                return new ApiResponse<User>().SetErrorResponse("errors", "Role not found!");
+                return new ApiResponse<ApplicationUser>().SetErrorResponse("errors", "Role not found!");
 
-            return new ApiResponse<User>().SetSuccessResponse(applicationUser, "success", "Role not found!");
+            return new ApiResponse<ApplicationUser>().SetSuccessResponse(applicationUser, "success", "Role not found!");
         }
 
 
@@ -103,7 +103,7 @@ namespace TVServiceCRM.Server.Controllers
 
 
             // Retrieve Data.
-            List<User> result = await _dataService.Query.Users.ToListAsync();
+            List<ApplicationUser> result = await _dataService.Query.Users.ToListAsync();
             result.ForEach(async x =>
             {
                 x.RoleId = (await _userManager.GetRolesAsync(x)).First();
@@ -134,7 +134,7 @@ namespace TVServiceCRM.Server.Controllers
         [HttpPost("Register")]
         public async Task<ApiResponse<bool>> Register(UserRegisterRequestDto request)
         {
-            User user = new User()
+            ApplicationUser user = new ApplicationUser()
             {
                 UserName = request.UserName,
                 Email = request.Email,
@@ -174,7 +174,7 @@ namespace TVServiceCRM.Server.Controllers
         [HttpPost("Login")]
         public async Task<ApiResponse<UserLoginResponseDto>> Login(UserLoginRequestDto request)
         {
-            User? user = await _userManager.FindByEmailAsync(request.Email);
+            ApplicationUser? user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
             {
                 user = await _userManager.FindByNameAsync(request.Email);
@@ -230,7 +230,7 @@ namespace TVServiceCRM.Server.Controllers
                 return new ApiResponse<bool>().SetSuccessResponse(true);
 
             string username = User.Claims.First(x => x.Type == "UserName").Value;
-            User? appUser = await _dataService.Users.FirstOrDefaultAsync(x => x.UserName == username);
+            ApplicationUser? appUser = await _dataService.Users.FirstOrDefaultAsync(x => x.UserName == username);
 
             if (appUser != null)
                 await _userManager.UpdateSecurityStampAsync(appUser);
@@ -253,7 +253,7 @@ namespace TVServiceCRM.Server.Controllers
             if (id == null || id.Count() == 0)
                 return new ApiResponse<IdentityUser>().SetErrorResponse("error", "User name not not set!");
 
-            User? user = await _userManager.FindByIdAsync(id);
+            ApplicationUser? user = await _userManager.FindByIdAsync(id);
             if (user == null)
                 return new ApiResponse<IdentityUser>().SetErrorResponse("error", "User not found!");
 
@@ -267,7 +267,7 @@ namespace TVServiceCRM.Server.Controllers
 
 
 
-        private async Task<UserLoginResponseDto> GenerateUserToken(User user)
+        private async Task<UserLoginResponseDto> GenerateUserToken(Model.Models.ApplicationUser user)
         {
             List<Claim> claims = (from ur in _dataService.Query.UserRoles
                                   where ur.UserId == user.Id
@@ -298,7 +298,7 @@ namespace TVServiceCRM.Server.Controllers
             return new UserLoginResponseDto() { AccessToken = token, RefreshToken = refreshToken };
         }
 
-        private string GetToken(TokenSettings appSettings, User user, List<Claim> roleClaims)
+        private string GetToken(TokenSettings appSettings, Model.Models.ApplicationUser user, List<Claim> roleClaims)
         {
             SymmetricSecurityKey secretKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(appSettings.SecretKey));
             SigningCredentials signInCredentials = new SigningCredentials(secretKey, SecurityAlgorithms.HmacSha256);

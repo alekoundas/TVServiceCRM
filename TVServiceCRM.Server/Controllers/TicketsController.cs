@@ -12,12 +12,12 @@ namespace TVServiceCRM.Server.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class TicketsController : ControllerBase
+    public class TicketsController : GenericController<Ticket, TicketsController>
     {
         private readonly IDataService _dataService;
         private readonly ILogger<TicketsController> _logger;
 
-        public TicketsController(ILogger<TicketsController> logger, IDataService dataService)
+        public TicketsController(IDataService dataService, ILogger<TicketsController> logger) : base(dataService, logger)
         {
             _logger = logger;
             _dataService = dataService;
@@ -79,26 +79,26 @@ namespace TVServiceCRM.Server.Controllers
 
 
         // GET: api/Tickets
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Ticket>>> GetTickets()
-        {
-            List<Ticket> result = await _dataService.Tickets.GetPaggingWithFilterAndSort(null, null, null);
-            return result;
-        }
+        //[HttpGet]
+        //public async Task<ActionResult<IEnumerable<Ticket>>> GetTickets()
+        //{
+        //    List<Ticket> result = await _dataService.Tickets.GetPaggingWithFilterAndSort(null, null, null);
+        //    return result;
+        //}
 
         // GET: api/Tickets/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Ticket>> GetTicket(int id)
-        {
-            var ticket = await _dataService.Tickets.FindByIdAsync(id);
+        //[HttpGet("{id}")]
+        //public async Task<ActionResult<Ticket>> GetTicket(int id)
+        //{
+        //    var ticket = await _dataService.Tickets.FindByIdAsync(id);
 
-            if (ticket == null)
-            {
-                return NotFound();
-            }
+        //    if (ticket == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            return ticket;
-        }
+        //    return ticket;
+        //}
 
         // PUT: api/Tickets/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -141,20 +141,20 @@ namespace TVServiceCRM.Server.Controllers
         }
 
         // DELETE: api/Tickets/5
-        [HttpDelete("{id}")]
-        public async Task<IActionResult> DeleteTicket(int id)
-        {
-            var ticket = await _dataService.Tickets.FindByIdAsync(id);
-            if (ticket == null)
-            {
-                return NotFound();
-            }
+        //[HttpDelete("{id}")]
+        //public async Task<IActionResult> DeleteTicket(int id)
+        //{
+        //    var ticket = await _dataService.Tickets.FindByIdAsync(id);
+        //    if (ticket == null)
+        //    {
+        //        return NotFound();
+        //    }
 
-            _dataService.Tickets.Remove(ticket);
-            await _dataService.SaveChangesAsync();
+        //    _dataService.Tickets.Remove(ticket);
+        //    await _dataService.SaveChangesAsync();
 
-            return NoContent();
-        }
+        //    return NoContent();
+        //}
 
         private bool TicketExists(int id)
         {
