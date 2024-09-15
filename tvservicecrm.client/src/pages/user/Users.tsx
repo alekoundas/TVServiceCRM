@@ -11,6 +11,7 @@ import { DataTableFilterDisplayEnum } from "../../enum/DataTableFilterDisplayEnu
 import AddDialogComponent from "../../components/dialog/AddDialogComponent";
 import UserForm from "./UserForm";
 import { UserDto } from "../../model/UserDto";
+import { Card } from "primereact/card";
 
 export default function Users() {
   const [userDto, setUserDto] = useState<UserDto>(new UserDto());
@@ -74,8 +75,7 @@ export default function Users() {
   ];
 
   const onDataTableClick = (buttonType: ButtonTypeEnum, rowData?: UserDto) => {
-    if (!rowData) return;
-    setUserDto({ ...rowData });
+    if (rowData) setUserDto({ ...rowData });
 
     switch (buttonType) {
       case ButtonTypeEnum.VIEW:
@@ -118,7 +118,7 @@ export default function Users() {
 
   return (
     <>
-      <div className="card">
+      <Card title="Users">
         <DataTableComponent
           onButtonClick={onDataTableClick}
           controller="users"
@@ -129,7 +129,7 @@ export default function Users() {
           dataTableColumns={dataTableColumns}
           triggerRefreshData={onRefreshDataTable}
         />
-      </div>
+      </Card>
 
       {/* Delete Modal */}
       <DeleteDialogComponent

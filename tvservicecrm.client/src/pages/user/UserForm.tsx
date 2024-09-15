@@ -87,10 +87,10 @@ export default function UserForm({
         <form>
           <div className="flex align-items-center justify-content-center">
             <div className="field">
-              <label htmlFor="name">Role Name</label>
+              <label htmlFor="name">User Name</label>
               <InputText
                 id="userName"
-                name="User Name"
+                name="userName"
                 value={userDto.userName}
                 onChange={handleChange}
                 disabled={
@@ -99,10 +99,10 @@ export default function UserForm({
               />
             </div>
             <div className="field">
-              <label htmlFor="name">Role Name</label>
+              <label htmlFor="name">Email</label>
               <InputText
-                id="name"
-                name="name"
+                id="email"
+                name="email"
                 value={userDto.email}
                 onChange={handleChange}
                 disabled={

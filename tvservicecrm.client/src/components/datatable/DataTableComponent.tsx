@@ -124,19 +124,6 @@ export default function DataTableComponent<TEntity extends DataTableValue>({
     );
   };
 
-  // useEffect(() => {
-  //   dataTableService.loadData(null);
-  //   console.log("loaded");
-  // }, [location]);
-  // Method to get the current data
-
-  // Effect to trigger data request if onRequestData is provided
-  // React.useEffect(() => {
-  //   if (onRequestData) {
-  //     onRequestData(() => dataTableDto);
-  //   }
-  // }, [onRequestData]);
-
   return (
     <>
       <DataTable

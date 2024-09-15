@@ -99,71 +99,69 @@ function Customers() {
 
   return (
     <>
-      <div className="w-full card ">
-        <Card title="Customers">
-          <DataTable
-            value={dataTableDtoState.data}
-            lazy
-            stripedRows
-            emptyMessage="No customers found."
-            tableStyle={{ minWidth: "50rem" }}
-            selectionMode="single"
-            loading={loading}
-            header={renderHeader}
-            // Pagging.
-            paginator
-            rows={dataTableDtoState.rows}
-            totalRecords={dataTableDtoState.pageCount}
-            onPage={dataTableService.onPage}
-            rowsPerPageOptions={[10, 25, 50, 100]}
-            // paginatorLeft={paginatorLeft}
-            currentPageReportTemplate={
-              "1 to " +
-              dataTableDtoState.rows +
-              " out of " +
-              dataTableDtoState.pageCount
-            }
-            paginatorTemplate="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink RowsPerPageDropdown"
-            // Filter.
-            filterDisplay="row"
-            filters={dataTableDtoState.filters}
-            onFilter={dataTableService.onFilter}
-            // Sort.
-            removableSort
-            sortMode="multiple"
-            onSort={dataTableService.onSort}
-            multiSortMeta={dataTableDtoState.multiSortMeta}
-          >
-            <Column
-              field="firstName"
-              header="First Name"
-              sortable
-              filter
-              filterPlaceholder="Search by First Name"
-            ></Column>
-            <Column
-              field="lastName"
-              header="Last Name"
-              sortable
-              filter
-              filterPlaceholder="Search by Last Name"
-            ></Column>
-            <Column
-              field="createdOn"
-              header="Creation Date"
-              filterElement={activityRowFilterTemplate}
-              sortable
-              filter
-              filterPlaceholder="Search by Creation Day"
-            ></Column>
-            <Column
-              header="Actions"
-              headerStyle={{ width: "20%", minWidth: "8rem" }}
-              body={gridRowActions}
-            ></Column>
-          </DataTable>
-        </Card>
-      </div>
+      <Card title="Customers">
+        <DataTable
+          value={dataTableDtoState.data}
+          lazy
+          stripedRows
+          emptyMessage="No customers found."
+          tableStyle={{ minWidth: "50rem" }}
+          selectionMode="single"
+          loading={loading}
+          header={renderHeader}
+          // Pagging.
+          paginator
+          rows={dataTableDtoState.rows}
+          totalRecords={dataTableDtoState.pageCount}
+          onPage={dataTableService.onPage}
+          rowsPerPageOptions={[10, 25, 50, 100]}
+          // paginatorLeft={paginatorLeft}
+          currentPageReportTemplate={
+            "1 to " +
+            dataTableDtoState.rows +
+            " out of " +
+            dataTableDtoState.pageCount
+          }
+          paginatorTemplate="FirstPageLink PrevPageLink CurrentPageReport NextPageLink LastPageLink RowsPerPageDropdown"
+          // Filter.
+          filterDisplay="row"
+          filters={dataTableDtoState.filters}
+          onFilter={dataTableService.onFilter}
+          // Sort.
+          removableSort
+          sortMode="multiple"
+          onSort={dataTableService.onSort}
+          multiSortMeta={dataTableDtoState.multiSortMeta}
+        >
+          <Column
+            field="firstName"
+            header="First Name"
+            sortable
+            filter
+            filterPlaceholder="Search by First Name"
+          ></Column>
+          <Column
+            field="lastName"
+            header="Last Name"
+            sortable
+            filter
+            filterPlaceholder="Search by Last Name"
+          ></Column>
+          <Column
+            field="createdOn"
+            header="Creation Date"
+            filterElement={activityRowFilterTemplate}
+            sortable
+            filter
+            filterPlaceholder="Search by Creation Day"
+          ></Column>
+          <Column
+            header="Actions"
+            headerStyle={{ width: "20%", minWidth: "8rem" }}
+            body={gridRowActions}
+          ></Column>
+        </DataTable>
+      </Card>
     </>
   );
 }

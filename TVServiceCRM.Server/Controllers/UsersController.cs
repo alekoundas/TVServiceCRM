@@ -239,7 +239,7 @@ namespace TVServiceCRM.Server.Controllers
             return new ApiResponse<bool>().SetSuccessResponse(true);
         }
 
-        [HttpPost]
+        [HttpPost("Profile")]
         [Authorize(Roles = "Administrator")]
         public ApiResponse<bool> Profile()
         {

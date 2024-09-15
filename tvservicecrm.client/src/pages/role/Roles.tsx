@@ -11,6 +11,7 @@ import { IdentityRoleDto } from "../../model/IdentityRoleDto";
 import RoleForm from "./RoleForm";
 import { DataTableFilterDisplayEnum } from "../../enum/DataTableFilterDisplayEnum";
 import AddDialogComponent from "../../components/dialog/AddDialogComponent";
+import { Card } from "primereact/card";
 
 export default function Roles() {
   const [roleName, setRoleName] = useState("");
@@ -94,9 +95,6 @@ export default function Roles() {
       default:
         break;
     }
-
-    console.log(rowData);
-    console.log(buttonType);
   };
 
   const afterSave = () => {
@@ -115,18 +113,20 @@ export default function Roles() {
 
   return (
     <>
-      <div className="card">
-        <DataTableComponent
-          onButtonClick={onDataTableClick}
-          controller="roles"
-          enableGridRowActions={true}
-          filterDisplay={DataTableFilterDisplayEnum.ROW}
-          enableAddAction={true}
-          dataTable={datatableDto}
-          dataTableColumns={dataTableColumns}
-          triggerRefreshData={onRefreshDataTable}
-        />
-      </div>
+      <Card title="Roles">
+        <div className="card">
+          <DataTableComponent
+            onButtonClick={onDataTableClick}
+            controller="roles"
+            enableGridRowActions={true}
+            filterDisplay={DataTableFilterDisplayEnum.ROW}
+            enableAddAction={true}
+            dataTable={datatableDto}
+            dataTableColumns={dataTableColumns}
+            triggerRefreshData={onRefreshDataTable}
+          />
+        </div>
+      </Card>
 
       {/* Delete Modal */}
       <DeleteDialogComponent

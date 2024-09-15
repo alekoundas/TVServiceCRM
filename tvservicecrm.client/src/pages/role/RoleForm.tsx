@@ -55,7 +55,6 @@ export default function RoleForm({
     if (getDataFromDataTable) {
       identityRoleDto.claims = getDataFromDataTable();
       setIdentityRoleDto({ ...identityRoleDto });
-      console.log(identityRoleDto.claims);
       if (formMode == FormMode.EDIT) {
         ApiService.update("roles", identityRoleDto, identityRoleDto.id)
           .then((response) => {
