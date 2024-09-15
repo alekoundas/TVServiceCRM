@@ -60,13 +60,14 @@ function NavLeft() {
   return (
     <>
       <div
-        className="card w-full"
+        className="card "
         style={{ height: "93vh" }}
       >
         <Toast ref={toast} />
         <Menu
           model={items}
-          className="h-full w-full md:w-15rem"
+          className="h-full w-full"
+          // className="h-full w-full lg:w-15rem"
         />
       </div>
     </>

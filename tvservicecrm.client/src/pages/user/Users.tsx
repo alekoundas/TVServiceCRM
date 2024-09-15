@@ -39,6 +39,7 @@ export default function Users() {
     filters: {
       userName: { value: "", matchMode: "contains" },
       email: { value: "", matchMode: "contains" },
+      roleId: { value: "", matchMode: "contains" },
     },
   };
 
@@ -49,7 +50,7 @@ export default function Users() {
       sortable: formMode !== FormMode.ADD,
       filter: formMode !== FormMode.ADD,
       filterPlaceholder: "Search",
-      style: { width: "30%" },
+      style: { width: "20%" },
       body: null,
     },
     {
@@ -58,7 +59,16 @@ export default function Users() {
       sortable: formMode !== FormMode.ADD,
       filter: formMode !== FormMode.ADD,
       filterPlaceholder: "Search",
-      style: { width: "30%" },
+      style: { width: "20%" },
+      body: null,
+    },
+    {
+      field: "roleId",
+      header: "Role Id",
+      sortable: formMode !== FormMode.ADD,
+      filter: formMode !== FormMode.ADD,
+      filterPlaceholder: "Search",
+      style: { width: "20%" },
       body: null,
     },
   ];

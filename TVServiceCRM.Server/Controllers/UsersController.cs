@@ -17,7 +17,7 @@ using AutoMapper;
 namespace TVServiceCRM.Server.Controllers
 {
     [ApiController]
-    [Route("api/[controller]/[action]")]
+    [Route("api/[controller]")]
     public class UsersController : ControllerBase
     {
         private readonly IDataService _dataService;
@@ -104,7 +104,10 @@ namespace TVServiceCRM.Server.Controllers
 
             // Retrieve Data.
             List<User> result = await _dataService.Query.Users.ToListAsync();
-
+            result.ForEach(async x =>
+            {
+                x.RoleId = (await _userManager.GetRolesAsync(x)).First();
+            });
 
 
             //    (
@@ -128,7 +131,8 @@ namespace TVServiceCRM.Server.Controllers
 
         }
 
-        [HttpPost]
+        // POST: api/Users/Register
+        [HttpPost("Register")]
         public async Task<ApiResponse<bool>> Register(UserRegisterRequestDto request)
         {
             User user = new User()
@@ -139,15 +143,9 @@ namespace TVServiceCRM.Server.Controllers
 
             var result = await _userManager.CreateAsync(user, request.Password);
             if (result.Succeeded)
-            {
                 return new ApiResponse<bool>().SetSuccessResponse(true);
-            }
             else
-            {
                 return new ApiResponse<bool>().SetErrorResponse(GetRegisterErrors(result));
-            }
-
-
         }
 
         private Dictionary<string, string[]> GetRegisterErrors(IdentityResult result)
@@ -165,9 +163,7 @@ namespace TVServiceCRM.Server.Controllers
                     newDescriptions[descriptions.Length] = error.Description;
                 }
                 else
-                {
                     newDescriptions = [error.Description];
-                }
 
                 errorDictionary[error.Code] = newDescriptions;
             }
@@ -175,31 +171,31 @@ namespace TVServiceCRM.Server.Controllers
             return errorDictionary;
         }
 
-
-        [HttpPost]
+        // POST: api/Users/Login
+        [HttpPost("Login")]
         public async Task<ApiResponse<UserLoginResponseDto>> Login(UserLoginRequestDto request)
         {
             User? user = await _userManager.FindByEmailAsync(request.Email);
             if (user == null)
             {
-                return new ApiResponse<UserLoginResponseDto>().SetErrorResponse("email", "Email not found");
+                user = await _userManager.FindByNameAsync(request.Email);
+                if (user == null)
+                    return new ApiResponse<UserLoginResponseDto>().SetErrorResponse("email", "Email not found");
+            }
+
+
+            var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, true);
+            if (result.Succeeded)
+            {
+                var token = await GenerateUserToken(user);
+                return new ApiResponse<UserLoginResponseDto>().SetSuccessResponse(token);
             }
             else
-            {
-                var result = await _signInManager.CheckPasswordSignInAsync(user, request.Password, true);
-                if (result.Succeeded)
-                {
-                    var token = await GenerateUserToken(user);
-                    return new ApiResponse<UserLoginResponseDto>().SetSuccessResponse(token);
-                }
-                else
-                {
-                    return new ApiResponse<UserLoginResponseDto>().SetErrorResponse("password", result.ToString());
-                }
-            }
+                return new ApiResponse<UserLoginResponseDto>().SetErrorResponse("password", result.ToString());
         }
 
-        [HttpPost]
+        // POST: api/Users/RefreshToken
+        [HttpPost("RefreshToken")]
         public async Task<ApiResponse<UserRefreshResponseDto>> RefreshToken(UserRefreshRequestDto request)
         {
             var principal = GetPrincipalFromExpiredToken(_tokenSettings, request.AccessToken);
@@ -225,7 +221,10 @@ namespace TVServiceCRM.Server.Controllers
                 }
             }
         }
-        [HttpPost]
+
+
+        // POST: api/Users/Logout
+        [HttpPost("Logout")]
         public async Task<ApiResponse<bool>> Logout()
         {
             if (User.Identity?.IsAuthenticated == null || !User.Identity.IsAuthenticated)

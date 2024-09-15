@@ -7,8 +7,8 @@ import { ToastService } from "./ToastService";
 import { TokenService } from "./TokenService";
 
 export default class ApiService {
-  static serverUrl = "https://alexps.gr/api/";
-  // static serverUrl = "http://localhost:8080/api/";
+  // static serverUrl = "https://alexps.gr/api/";
+  static serverUrl = "http://localhost:8080/api/";
 
   public static async get<TEntity>(
     controller: string,

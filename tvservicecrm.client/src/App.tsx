@@ -40,6 +40,64 @@ export default function App() {
       />
       <Toast ref={toast} />
 
+      <div className="grid   ">
+        <div className="col-12 ">
+          <NavTop />
+        </div>
+        <div className="col-2 ">
+          <NavLeft />
+        </div>
+        <div className="col-10 ">
+          <ScrollPanel
+            style={{ height: "100%", width: "100%" }}
+            className="custombar2"
+          >
+            <Routes>
+              <Route
+                path="/"
+                element={<Home />}
+              />
+
+              <Route
+                path="/customers"
+                element={<Customers />}
+              />
+              <Route
+                path="/customers/add"
+                element={<CustomerForm />}
+              />
+              <Route
+                path="/customers/:id/edit"
+                element={<CustomerForm />}
+              />
+              <Route
+                path="/customers/:id/view"
+                element={<CustomerForm />}
+              />
+
+              <Route
+                path="/tickets"
+                element={<Tickets />}
+              />
+
+              <Route
+                path="/users/login"
+                element={<Login />}
+              />
+              <Route
+                path="/users"
+                element={<Users />}
+              />
+
+              <Route
+                path="/roles"
+                element={<Roles />}
+              />
+            </Routes>
+          </ScrollPanel>
+        </div>
+      </div>
+      {/* 
       <div className=" w-full ">
         <div className="flex flex-row pb-3">
           <div className="flex flex-column w-full">
@@ -52,10 +110,10 @@ export default function App() {
             <NavLeft />
           </div>
 
-          <div className="flex-column w-full ">
+          <div className="flex-column flex-auto ">
             <ScrollPanel
-              style={{ height: "93vh" }}
-              className="custombar1"
+              style={{ height: "100%", width: "100%" }}
+              className="custombar2"
             >
               <Routes>
                 <Route
@@ -102,7 +160,7 @@ export default function App() {
             </ScrollPanel>
           </div>
         </div>
-      </div>
+      </div> */}
     </>
   );
 }

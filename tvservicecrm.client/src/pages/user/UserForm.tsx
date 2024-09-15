@@ -110,18 +110,18 @@ export default function UserForm({
                 }
               />
             </div>
-            {/* <div className="field">
-              <label htmlFor="name">Role Name</label>
+            <div className="field">
+              <label htmlFor="roleId">Role Name</label>
               <InputText
-                id="name"
-                name="name"
-                value={identityRoleDto.name}
+                id="roleId"
+                name="roleId"
+                value={userDto.roleId}
                 onChange={handleChange}
                 disabled={
                   formMode !== FormMode.ADD && formMode !== FormMode.EDIT
                 }
               />
-            </div> */}
+            </div>
           </div>
         </form>
       </Card>
