@@ -14,14 +14,14 @@ import AddDialogComponent from "../../components/dialog/AddDialogComponent";
 import { Card } from "primereact/card";
 
 export default function Roles() {
-  const [roleName, setRoleName] = useState("");
-  const [roleId, setRoleId] = useState("");
+  const [identityRoleDto, setIdentityRoleDto] = useState(new IdentityRoleDto());
 
   let setDeleteDialogVisibility: (newValue: boolean) => void = () => {};
   let setEditDialogVisibility: (newValue: boolean) => void = () => {};
   let setViewDialogVisibility: (newValue: boolean) => void = () => {};
   let setAddDialogVisibility: (newValue: boolean) => void = () => {};
-  let setSaveDisable: (newValue: boolean) => void = () => {};
+  let setSaveDisableStateAdd: (newValue: boolean) => void = () => {};
+  let setSaveDisableStateEdit: (newValue: boolean) => void = () => {};
   let triggerFormSave: () => void = () => {};
   const onRefreshDataTable = useRef<(() => void) | undefined>(undefined);
 
@@ -70,8 +70,7 @@ export default function Roles() {
     buttonType: ButtonTypeEnum,
     rowData?: IdentityRoleDto
   ) => {
-    setRoleName(rowData?.name ?? "");
-    setRoleId(rowData?.id ?? "");
+    if (rowData) setIdentityRoleDto({ ...rowData });
     switch (buttonType) {
       case ButtonTypeEnum.VIEW:
         setViewDialogVisibility(true);
@@ -132,8 +131,8 @@ export default function Roles() {
       <DeleteDialogComponent
         onAfterRowDeletion={afterSave}
         triggerDialogVisibility={(fn) => (setDeleteDialogVisibility = fn)}
-        id={roleId}
-        name={roleName}
+        id={identityRoleDto.id}
+        name={identityRoleDto.name}
       />
 
       {/* View Modal */}
@@ -141,9 +140,8 @@ export default function Roles() {
         triggerDialogVisibility={(fn) => (setViewDialogVisibility = fn)}
       >
         <RoleForm
-          id={roleId}
+          data={identityRoleDto}
           formMode={FormMode.VIEW}
-          roleName={roleName}
           onAfterSave={afterSave}
         />
       </ViewDialogComponent>
@@ -152,16 +150,15 @@ export default function Roles() {
       <EditDialogComponent
         onSaveButtonClick={triggerSave}
         triggerDialogVisibility={(fn) => (setEditDialogVisibility = fn)}
-        triggerSaveDisable={(fn) => (setSaveDisable = fn)}
-        triggerSaveEnable={(fn) => (setSaveDisable = fn)}
+        triggerSaveDisable={(fn) => (setSaveDisableStateEdit = fn)}
+        triggerSaveEnable={(fn) => (setSaveDisableStateEdit = fn)}
       >
         <RoleForm
-          id={roleId}
+          data={identityRoleDto}
           formMode={FormMode.EDIT}
-          roleName={roleName}
           onAfterSave={afterSave}
-          onDisableSaveButton={() => setSaveDisable(false)}
-          onEnableSaveButton={() => setSaveDisable(true)}
+          onDisableSaveButton={() => setSaveDisableStateEdit(false)}
+          onEnableSaveButton={() => setSaveDisableStateEdit(true)}
           triggerSaveForm={triggerFormSave}
         />
       </EditDialogComponent>
@@ -170,16 +167,15 @@ export default function Roles() {
       <AddDialogComponent
         onSaveButtonClick={triggerSave}
         triggerDialogVisibility={(fn) => (setAddDialogVisibility = fn)}
-        triggerSaveDisable={(fn) => (setSaveDisable = fn)}
-        triggerSaveEnable={(fn) => (setSaveDisable = fn)}
+        triggerSaveDisable={(fn) => (setSaveDisableStateAdd = fn)}
+        triggerSaveEnable={(fn) => (setSaveDisableStateAdd = fn)}
       >
         <RoleForm
-          id={roleId}
+          data={identityRoleDto}
           formMode={FormMode.ADD}
-          roleName={roleName}
           onAfterSave={afterSave}
-          onDisableSaveButton={() => setSaveDisable(false)}
-          onEnableSaveButton={() => setSaveDisable(true)}
+          onDisableSaveButton={() => setSaveDisableStateAdd(false)}
+          onEnableSaveButton={() => setSaveDisableStateAdd(true)}
           triggerSaveForm={triggerFormSave}
         />
       </AddDialogComponent>

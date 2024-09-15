@@ -62,7 +62,7 @@ namespace TVServiceCRM.Server.Controllers
                 return new ApiResponse<IdentityRoleDto>().SetErrorResponse("errors", "Role not found!");
 
             IdentityRoleDto identityRoleDto = _mapper.Map< IdentityRoleDto >(role);
-            return new ApiResponse<IdentityRoleDto>().SetSuccessResponse(identityRoleDto,"success","Role not found!");
+            return new ApiResponse<IdentityRoleDto>().SetSuccessResponse(identityRoleDto);
         }
 
 
@@ -80,7 +80,7 @@ namespace TVServiceCRM.Server.Controllers
 
         // POST: api/IdentityRoles/GetDataTable
         [HttpPost("GetDataTable")]
-        public async Task<DataTableDto<IdentityRoleDto>> GetDataTable([FromBody] DataTableDto<IdentityRoleDto> dataTable)
+        public async Task<ApiResponse<DataTableDto<IdentityRoleDto>>> GetDataTable([FromBody] DataTableDto<IdentityRoleDto> dataTable)
         {
             //Func<IQueryable<IdentityRole>, IOrderedQueryable<IdentityRole>>? orderByQuery = null;
             //List<Func<IOrderedQueryable<IdentityRole>, IOrderedQueryable<IdentityRole>>>? thenOrderByQuery = new List<Func<IOrderedQueryable<IdentityRole>, IOrderedQueryable<IdentityRole>>>();
@@ -139,7 +139,8 @@ namespace TVServiceCRM.Server.Controllers
 
             dataTable.Data = IdentityRoleDto;
             dataTable.PageCount = 0;
-            return dataTable;
+
+            return new ApiResponse<DataTableDto<IdentityRoleDto>>().SetSuccessResponse(dataTable);
 
         }
 

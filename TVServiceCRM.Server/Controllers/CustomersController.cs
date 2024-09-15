@@ -8,6 +8,7 @@ using TVServiceCRM.Server.Model.Dtos;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore.Query;
 using Microsoft.EntityFrameworkCore;
+using TVServiceCRM.Server.Model.Dtos.Identity;
 
 namespace TVServiceCRM.Server.Controllers
 {
@@ -36,7 +37,7 @@ namespace TVServiceCRM.Server.Controllers
 
         // POST: api/Customers/GetDataTable
         [HttpPost("GetDataTable")]
-        public async Task<DataTableDto<CustomerDto>> GetDataTable([FromBody] DataTableDto<CustomerDto> dataTable)
+        public async Task<ApiResponse<DataTableDto<CustomerDto>>> GetDataTable([FromBody] DataTableDto<CustomerDto> dataTable)
         {
             Func<IQueryable<Customer>, IOrderedQueryable<Customer>>? orderByQuery = null;
             List<Func<IOrderedQueryable<Customer>, IOrderedQueryable<Customer>>>? thenOrderByQuery = new List<Func<IOrderedQueryable<Customer>, IOrderedQueryable<Customer>>>();
@@ -96,7 +97,8 @@ namespace TVServiceCRM.Server.Controllers
 
             dataTable.Data = customerDto;
             dataTable.PageCount = rows;
-            return dataTable;
+
+            return new ApiResponse<DataTableDto<CustomerDto>>().SetSuccessResponse(dataTable);
 
         }
 

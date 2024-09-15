@@ -17,8 +17,8 @@ export default function AddDialogComponent({
   triggerSaveDisable,
   triggerSaveEnable,
 }: IField) {
-  const [isVisible, setIsVisible] = useState(false);
-  const [isEnabled, setIsEnabled] = useState(false);
+    const [isVisible, setIsVisible] = useState(false);
+  const [isEnabled, setIsEnabled] = useState(true);
 
   React.useEffect(() => {
     triggerDialogVisibility((value: boolean) => setIsVisible(value));

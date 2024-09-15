@@ -15,9 +15,8 @@ import ApiService from "../../services/ApiService";
 import { ToastService } from "../../services/ToastService";
 
 interface IField {
-  id: string;
+  data: IdentityRoleDto;
   formMode: FormMode;
-  roleName: string;
   onEnableSaveButton?: () => void;
   onDisableSaveButton?: () => void;
   onAfterSave: () => void;
@@ -25,15 +24,14 @@ interface IField {
 }
 
 export default function RoleForm({
-  id,
+  data,
   formMode,
-  roleName,
   onEnableSaveButton,
   onDisableSaveButton,
   onAfterSave,
   triggerSaveForm,
 }: IField) {
-  const [identityRoleDto, setIdentityRoleDto] = useState(new IdentityRoleDto());
+  const [identityRoleDto, setIdentityRoleDto] = useState(data);
   const isFirstRender = React.useRef(true);
   let getDataFromDataTable: () => ClaimDto[] = () => [];
 
@@ -93,7 +91,7 @@ export default function RoleForm({
     multiSortMeta: [],
     filters: {
       roleName: {
-        value: roleName,
+        value: identityRoleDto.name,
         matchMode: "contains",
       },
     },
@@ -198,11 +196,13 @@ export default function RoleForm({
   // Load initial data.
   React.useEffect(() => {
     if (formMode === FormMode.EDIT || formMode === FormMode.VIEW) {
-      ApiService.get<IdentityRoleDto>("roles", id).then((result) => {
-        if (result) {
-          setIdentityRoleDto({ ...result });
+      ApiService.get<IdentityRoleDto>("roles", identityRoleDto.id).then(
+        (result) => {
+          if (result) {
+            setIdentityRoleDto({ ...result });
+          }
         }
-      });
+      );
     }
   }, []);
 

@@ -7,6 +7,7 @@ using TVServiceCRM.Server.Model.System;
 using TVServiceCRM.Server.Model.Dtos.DataTable;
 using AutoMapper;
 using TVServiceCRM.Server.Model.Dtos.Identity;
+using TVServiceCRM.Server.Model.Dtos;
 
 namespace TVServiceCRM.Server.Controllers
 {
@@ -46,7 +47,7 @@ namespace TVServiceCRM.Server.Controllers
 
         // POST: api/Claims/GetDataTable
         [HttpPost("GetDataTable")]
-        public async Task<DataTableDto<IdentityClaimDto>> GetDataTable([FromBody] DataTableDto<IdentityClaimDto> dataTable)
+        public async Task<ApiResponse<DataTableDto<IdentityClaimDto>>> GetDataTable([FromBody] DataTableDto<IdentityClaimDto> dataTable)
         {
             List<IdentityClaimDto> identityClaimsDto = new List<IdentityClaimDto>();
             List<string> controllerNames = _claimsIdentity.Claims
@@ -94,7 +95,7 @@ namespace TVServiceCRM.Server.Controllers
 
 
             dataTable.Data = identityClaimsDto;
-            return dataTable;
+            return new ApiResponse<DataTableDto<IdentityClaimDto>>().SetSuccessResponse(dataTable);
         }
     }
 }

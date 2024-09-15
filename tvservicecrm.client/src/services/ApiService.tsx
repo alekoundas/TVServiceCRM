@@ -1,7 +1,6 @@
 import { ApiResponse } from "../model/ApiResponse";
 import { DataTableDto } from "../model/DataTableDto";
 import { UserLoginRequestDto } from "../model/UserLoginRequestDto";
-import { UserRefreshTokenDto } from "../model/UserRefreshTokenDto";
 import { LocalStorageService } from "./LocalStorageService";
 import { ToastService } from "./ToastService";
 import { TokenService } from "./TokenService";
@@ -94,97 +93,84 @@ export default class ApiService {
     data?: TEntity
   ): Promise<TEntity | null> {
     let token = LocalStorageService.getAccessToken();
-    try {
-      const result = await this.apiFetch<TEntity>(
-        url,
-        method,
-        token,
-        data
-      ).then((response) => {
-        if (response.ok) {
-          return response;
+    const result = await this.apiFetch<TEntity>(url, method, token, data).then(
+      (response) => {
+        if (!response?.data || !response?.isSucceed) {
+          if (response?.messages) {
+            // Loop in dictionary to display errors.
+            Object.keys(response.messages).forEach((key) =>
+              response.messages[key].forEach((value) =>
+                ToastService.showError(value)
+              )
+            );
+          } else {
+            ToastService.showError(
+              "Something unexpected happend! API call was not successfull..."
+            );
+            console.log(2);
+          }
+          return null;
         }
 
-        if (response.status === 401) {
-          // Refresh Token Expired!
-          if (TokenService.isRefreshTokenExpired()) {
-            ToastService.showWarn("Token expired. Login Required.");
-            TokenService.logout();
-            return null;
-          }
-
-          // Access Token Expired!
-          // Try to renew token and re-execute earlier query.
-          if (TokenService.isTokenExpired()) {
-            ToastService.showInfo("Token expired. Trying to renew.");
-            return this.refreshUserToken().then((isSuccess) => {
-              if (isSuccess) {
-                ToastService.showInfo(
-                  "Token renewed. Trying earlier query again."
-                );
-
-                token = LocalStorageService.getAccessToken();
-                return this.apiFetch(url, method, token, data);
-              }
-            });
-          }
-        }
-      });
-
-      if (!result) {
-        ToastService.showError("Something didnt go as planned.");
-        return null;
+        // Loop in dictionary to display errors.
+        Object.keys(response.messages).forEach((key) =>
+          response.messages[key].forEach((value) =>
+            ToastService.showSuccess(value)
+          )
+        );
+        return response.data;
       }
+    );
 
-      const responseJson = await result.json();
-      return responseJson;
-    } catch (error) {
-      ToastService.showError(
-        "Something unexpected happend! API call was not successfull..."
-      );
-      console.error(error);
-      return null;
-    }
+    return result;
   }
 
   private static async refreshUserToken(): Promise<boolean> {
     const url = this.serverUrl + "users/refreshToken";
     const refreshTokenDto = TokenService.getUserRefreshTokenDto();
-    try {
-      const refreshTokenResponse = await this.apiFetch(
-        url,
-        "POST",
-        null,
-        refreshTokenDto
-      ).then((response) => {
-        if (!response.ok) {
+    return await this.apiFetch(url, "POST", null, refreshTokenDto).then(
+      (response) => {
+        if (!response || !response.data) {
           return false;
         }
 
-        const refreshTokenPromise: Promise<ApiResponse<UserRefreshTokenDto>> =
-          response.json();
+        // authLogin();
+        TokenService.setAccessToken(response.data.accessToken);
+        TokenService.setRefreshToken(response.data.refreshToken);
+        TokenService.setRefreshTokenExpireDate(response.toString());
+        return true;
+      }
+    );
+  }
 
-        return refreshTokenPromise.then((result) => {
-          if (!result.data) {
-            return false;
-          }
-
-          // authLogin();
-          TokenService.setAccessToken(result.data.accessToken);
-          TokenService.setRefreshToken(result.data.refreshToken);
-          TokenService.setRefreshTokenExpireDate(result.toString());
-          return true;
-        });
-      });
-
-      return refreshTokenResponse;
-    } catch (error) {
-      ToastService.showError(
-        "Something unexpected happend! API call was not successfull..."
-      );
-      console.error(error);
-      return false;
+  private static async handle401<TEntity>(
+    url: string,
+    method: string,
+    token?: string | null,
+    data?: TEntity | null
+  ): Promise<ApiResponse<TEntity> | null> {
+    // Refresh Token Expired!
+    if (TokenService.isRefreshTokenExpired()) {
+      ToastService.showWarn("Token expired. Login Required.");
+      TokenService.logout();
+      return null;
     }
+
+    // Access Token Expired!
+    // Try to renew token and re-execute earlier query.
+    if (TokenService.isTokenExpired()) {
+      ToastService.showInfo("Token expired. Trying to renew.");
+      return this.refreshUserToken().then((isSuccess) => {
+        if (isSuccess) {
+          ToastService.showInfo("Renewal success. Re-executing query.");
+
+          token = LocalStorageService.getAccessToken();
+          return this.apiFetch(url, method, token, data);
+        }
+        return null;
+      });
+    }
+    return null;
   }
 
   private static async apiFetch<TEntity>(
@@ -192,14 +178,38 @@ export default class ApiService {
     method: string,
     token?: string | null,
     data?: TEntity | null
-  ): Promise<Response> {
-    return await fetch(url, {
-      method: method,
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(data),
-    });
+  ): Promise<ApiResponse<TEntity> | null> {
+    try {
+      const response: Response = await fetch(url, {
+        method: method,
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(data),
+      });
+
+      // Check Refresh and Access Tokens!
+      if (response.status === 401) {
+        return this.handle401(url, method, token, data);
+      }
+
+      if (response.ok) {
+        const result = (await response.json()) as Promise<ApiResponse<TEntity>>;
+        return result;
+      }
+
+      ToastService.showError(
+        "Something unexpected happend! API call was not successfull..."
+      );
+      console.log(1);
+      return null;
+    } catch (error) {
+      ToastService.showError(
+        "Something unexpected happend! API call was not successfull..."
+      );
+      console.error(error);
+      return null;
+    }
   }
 }

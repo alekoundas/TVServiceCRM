@@ -5,6 +5,8 @@ using System.Linq.Expressions;
 using TVServiceCRM.Server.Business;
 using Microsoft.EntityFrameworkCore;
 using TVServiceCRM.Server.Model.Dtos.DataTable;
+using TVServiceCRM.Server.Model.Dtos.Identity;
+using TVServiceCRM.Server.Model.Dtos;
 
 namespace TVServiceCRM.Server.Controllers
 {
@@ -23,7 +25,7 @@ namespace TVServiceCRM.Server.Controllers
 
         // GET: api/Tickets/GetDataTable
         [HttpPost("GetDataTable")]
-        public async Task<DataTableDto<Ticket>> GetDataTable([FromBody] DataTableDto<Ticket> dataTable)
+        public async Task<ApiResponse<DataTableDto<Ticket>>> GetDataTable([FromBody] DataTableDto<Ticket> dataTable)
         {
             Func<IQueryable<Ticket>, IOrderedQueryable<Ticket>>? orderByQuery = null;
             List<Func<IOrderedQueryable<Ticket>, IOrderedQueryable<Ticket>>>? thenOrderByQuery = new List<Func<IOrderedQueryable<Ticket>, IOrderedQueryable<Ticket>>>();
@@ -71,7 +73,8 @@ namespace TVServiceCRM.Server.Controllers
 
             dataTable.Data = data;
             dataTable.PageCount = rows;
-            return dataTable;
+            return new ApiResponse<DataTableDto<Ticket>>().SetSuccessResponse(dataTable);
+
         }
 
 

@@ -8,6 +8,7 @@ using TVServiceCRM.Server.Business;
 using TVServiceCRM.Server.Model.Dtos.DataTable;
 using TVServiceCRM.Server.Model.Dtos;
 using AutoMapper;
+using TVServiceCRM.Server.Model.Dtos.Identity;
 
 namespace TVServiceCRM.Server.Controllers
 {
@@ -98,7 +99,7 @@ namespace TVServiceCRM.Server.Controllers
 
         // POST: api/ContactInformations/GetDataTable
         [HttpPost("GetDataTable")]
-        public async Task<DataTableDto<ContactInformationDto>> GetDataTable([FromBody] DataTableDto<ContactInformationDto> dataTable)
+        public async Task<ApiResponse<DataTableDto<ContactInformationDto>>> GetDataTable([FromBody] DataTableDto<ContactInformationDto> dataTable)
         {
             Func<IQueryable<ContactInformation>, IOrderedQueryable<ContactInformation>>? orderByQuery = null;
             List<Func<IOrderedQueryable<ContactInformation>, IOrderedQueryable<ContactInformation>>>? thenOrderByQuery = new List<Func<IOrderedQueryable<ContactInformation>, IOrderedQueryable<ContactInformation>>>();
@@ -153,8 +154,8 @@ namespace TVServiceCRM.Server.Controllers
 
             dataTable.Data = customerDto;
             dataTable.PageCount = rows;
-            return dataTable;
 
+            return new ApiResponse<DataTableDto<ContactInformationDto>>().SetSuccessResponse(dataTable);
         }
 
         private bool ContactInformationExists(int id)

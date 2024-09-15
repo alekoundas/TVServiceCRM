@@ -65,7 +65,7 @@ namespace TVServiceCRM.Server.Controllers
 
         // POST: api/Users/GetDataTable
         [HttpPost("GetDataTable")]
-        public async Task<DataTableDto<UserDto>> GetDataTable([FromBody] DataTableDto<UserDto> dataTable)
+        public async Task<ApiResponse<DataTableDto<UserDto>>> GetDataTable([FromBody] DataTableDto<UserDto> dataTable)
         {
             //Func<IQueryable<IdentityRole>, IOrderedQueryable<IdentityRole>>? orderByQuery = null;
             //List<Func<IOrderedQueryable<IdentityRole>, IOrderedQueryable<IdentityRole>>>? thenOrderByQuery = new List<Func<IOrderedQueryable<IdentityRole>, IOrderedQueryable<IdentityRole>>>();
@@ -127,8 +127,7 @@ namespace TVServiceCRM.Server.Controllers
 
             dataTable.Data = userDto;
             dataTable.PageCount = 0;
-            return dataTable;
-
+            return new ApiResponse<DataTableDto<UserDto>>().SetSuccessResponse(dataTable);
         }
 
         // POST: api/Users/Register
