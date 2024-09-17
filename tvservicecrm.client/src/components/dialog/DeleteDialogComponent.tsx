@@ -4,7 +4,7 @@ import { Dialog } from "primereact/dialog";
 import ApiService from "../../services/ApiService";
 
 interface IField {
-  id: string;
+  id: string | number;
   name: string;
   onAfterRowDeletion: () => void;
   triggerDialogVisibility: (callback: (value: boolean) => void) => void;

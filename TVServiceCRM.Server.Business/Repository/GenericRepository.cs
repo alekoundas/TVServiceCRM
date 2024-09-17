@@ -23,14 +23,20 @@ namespace TVServiceCRM.Server.Business.Repository
         public IQueryable<TEntity> Query => Context.Set<TEntity>();
 
 
-        public bool Any(Expression<Func<TEntity, bool>> predicate)
+        public bool Any(Expression<Func<TEntity, bool>>? predicate)
         {
-            return _set.Any(predicate);
+            if (predicate != null)
+                return _set.Any(predicate);
+
+            return _set.Any();
         }
 
-        public async Task<bool> AnyAsync(Expression<Func<TEntity, bool>> predicate)
+        public async Task<bool> AnyAsync(Expression<Func<TEntity, bool>>? predicate)
         {
-            return await _set.AnyAsync(predicate);
+               if (predicate != null)
+                return await _set.AnyAsync(predicate);
+
+            return await _set.AnyAsync();
         }
 
         public IQueryable<TEntity> Where(Expression<Func<TEntity, bool>> expression)
@@ -172,15 +178,17 @@ namespace TVServiceCRM.Server.Business.Repository
         }
 
         public IQueryable<TEntity> GetLookup(
-            Expression<Func<TEntity, bool>>? filter,
+            List<Expression<Func<TEntity, bool>>>? filters,
             Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderingInfo,
             int skip = 10,
             int take = 1)
         {
             var qry = (IQueryable<TEntity>)_set;
 
-            if (filter != null)
-                qry = qry.Where(filter);
+
+            if (filters != null)
+                foreach (var filter in filters)
+                    qry = qry.Where(filter);
 
             if (orderingInfo != null)
                 qry = orderingInfo(qry);

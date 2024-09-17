@@ -16,6 +16,12 @@ namespace TVServiceCRM.Server.DataAccess.Configurations
                 .HasForeignKey(x => x.CustomerId)
                 .IsRequired(true)
                 .OnDelete(DeleteBehavior.Cascade);
+
+            builder.HasOne(x => x.Maker)
+                .WithMany(x => x.Tickets)
+                .HasForeignKey(x => x.MakerId)
+                .IsRequired(false)
+                .OnDelete(DeleteBehavior.Cascade);
         }
     }
 }

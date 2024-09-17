@@ -8,8 +8,8 @@ namespace TVServiceCRM.Server.Business.IRepository
     {
         IQueryable<TEntity> Query { get; }
         
-        bool Any(Expression<Func<TEntity, bool>> predicate);
-        Task<bool> AnyAsync(Expression<Func<TEntity, bool>> predicate);
+        bool Any(Expression<Func<TEntity, bool>>? predicate);
+        Task<bool> AnyAsync(Expression<Func<TEntity, bool>>? predicate);
         IQueryable<TEntity> Where(Expression<Func<TEntity, bool>> expression);
         Task<int> CountAsync();
         Task<int> CountAsyncFiltered(List<Expression<Func<TEntity, bool>>> filters);
@@ -44,9 +44,9 @@ namespace TVServiceCRM.Server.Business.IRepository
             int pageIndex = 1);
 
         IQueryable<TEntity> GetLookup(
-            Expression<Func<TEntity, bool>>? filter,
-            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderingInfo,
-            int skip = 10,
-            int take = 1);
+                    List<Expression<Func<TEntity, bool>>>? filters,
+                    Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderingInfo,
+                    int skip = 10,
+                    int take = 1);
     }
 }

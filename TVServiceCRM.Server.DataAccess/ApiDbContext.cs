@@ -14,10 +14,13 @@ namespace TVServiceCRM.Server.DataAccess
         {
         }
 
+        public DbSet<Maker> Makers { get; set; }
         public DbSet<Ticket> Tickets { get; set; }
         public DbSet<Customer> Customers { get; set; }
-        public DbSet<ContactInformation> ContactInformations { get; set; }
+        public DbSet<MakerModel> MakerModels { get; set; }
         public DbSet<DataProtectionKey> DataProtectionKeys { get; set; }
+        public DbSet<ContactInformation> ContactInformations { get; set; }
+
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {

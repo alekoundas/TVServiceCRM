@@ -24,6 +24,12 @@ namespace TVServiceCRM.Server.AutoMapper
 
             CreateMap<ApplicationUser, UserDto>();
             CreateMap<UserDto, ApplicationUser>();
+
+            CreateMap<Maker, MakerDto>();
+            CreateMap<MakerDto, Maker>();
+
+            CreateMap<MakerModel, MakerModelDto>();
+            CreateMap<MakerModelDto, MakerModel>();
         }
     }
 }

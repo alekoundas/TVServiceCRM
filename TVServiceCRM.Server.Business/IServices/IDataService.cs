@@ -11,10 +11,12 @@ namespace TVServiceCRM.Server.Business.IServices
         ApiDbContext Query { get; }
         GenericRepository<TEntity> GetGenericRepository<TEntity>() where TEntity : class;
 
-        GenericRepository<ContactInformation> ContactInformations { get; }
-        GenericRepository<Customer> Customers { get; }
+        GenericRepository<Maker> Makers { get; }
         GenericRepository<Ticket> Tickets { get; }
+        GenericRepository<Customer> Customers { get; }
         GenericRepository<ApplicationUser> Users { get; }
+        GenericRepository<MakerModel> MakerModels { get; }
+        GenericRepository<ContactInformation> ContactInformations { get; }
 
 
 

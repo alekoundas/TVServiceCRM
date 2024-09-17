@@ -15,6 +15,8 @@ import Login from "./pages/user/Login.tsx";
 import ApiService from "./services/ApiService.tsx";
 import Roles from "./pages/role/Roles.tsx";
 import Users from "./pages/user/Users.tsx";
+import Makers from "./pages/maker/Makers.tsx";
+import MakerModels from "./pages/maker-model/MakerModels.tsx";
 
 export default function App() {
   // Set Toast messages here
@@ -92,6 +94,16 @@ export default function App() {
               <Route
                 path="/roles"
                 element={<Roles />}
+              />
+
+              <Route
+                path="/makers"
+                element={<Makers />}
+              />
+
+              <Route
+                path="/makermodels"
+                element={<MakerModels />}
               />
             </Routes>
           </ScrollPanel>

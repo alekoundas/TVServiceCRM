@@ -42,19 +42,25 @@ function NavLeft() {
         },
       ],
     },
-    // {
-    //   label: "Profile",
-    //   items: [
-    //     {
-    //       label: "Settings",
-    //       icon: "pi pi-cog",
-    //     },
-    //     {
-    //       label: "Logout",
-    //       icon: "pi pi-sign-out",
-    //     },
-    //   ],
-    // },
+    {
+      label: "Lookups",
+      items: [
+        {
+          label: "Makers",
+          icon: "pi pi-database",
+          command: () => {
+            navigate("/makers");
+          },
+        },
+        {
+          label: "Maker Models",
+          icon: "pi pi-database",
+          command: () => {
+            navigate("/makermodels");
+          },
+        },
+      ],
+    },
   ];
 
   return (

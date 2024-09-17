@@ -83,12 +83,12 @@ namespace TVServiceCRM.Server.Controllers
 
 
             List<string> userRoles = (await _userManager.GetRolesAsync(user)).ToList();
-            await _userManager.RemoveFromRolesAsync(user,userRoles);
+            await _userManager.RemoveFromRolesAsync(user, userRoles);
             await _userManager.AddToRoleAsync(user, role.Name);
             await _userManager.UpdateAsync(user);
-            
+
             //await _userManager.RemoveFromRoleAsync()
-            
+
             return Ok();
         }
 
@@ -135,10 +135,15 @@ namespace TVServiceCRM.Server.Controllers
             List<ApplicationUser> applicationUsers = await _dataService.Query.Users.ToListAsync();
             applicationUsers.ForEach(async x =>
             {
-                string userRole = (await _userManager.GetRolesAsync(x)).First();
-                IdentityRole? role = await _roleManager.FindByNameAsync(userRole);
-                if(role != null)
-                    x.RoleId = await _roleManager.GetRoleIdAsync(role);
+                List<string> rolelist = (await _userManager.GetRolesAsync(x)).ToList();
+
+                if (rolelist.Count > 0)
+                {
+                    string userRole = (await _userManager.GetRolesAsync(x)).First();
+                    IdentityRole? role = await _roleManager.FindByNameAsync(userRole);
+                    if (role != null)
+                        x.RoleId = await _roleManager.GetRoleIdAsync(role);
+                }
             });
 
 

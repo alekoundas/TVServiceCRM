@@ -6,8 +6,8 @@ interface IField {
   children: ReactElement;
   onSaveButtonClick: () => void;
   triggerDialogVisibility: (callback: (value: boolean) => void) => void;
-  triggerSaveDisable: (callback: (value: boolean) => void) => void;
-  triggerSaveEnable: (callback: (value: boolean) => void) => void;
+  triggerSaveDisable?: (callback: (value: boolean) => void) => void;
+  triggerSaveEnable?: (callback: (value: boolean) => void) => void;
 }
 
 export default function EditDialogComponent({
@@ -26,7 +26,8 @@ export default function EditDialogComponent({
   }, [triggerDialogVisibility]);
 
   React.useEffect(() => {
-    triggerSaveDisable((value: boolean) => setIsEnabled(value));
+    if (triggerSaveDisable)
+      triggerSaveDisable((value: boolean) => setIsEnabled(value));
   }, [triggerSaveDisable, triggerSaveEnable]);
 
   const dialogFooter = () => (

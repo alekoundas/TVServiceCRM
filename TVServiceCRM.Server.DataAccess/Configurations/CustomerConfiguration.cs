@@ -11,5 +11,5 @@ namespace TVServiceCRM.Server.DataAccess.Configurations
             builder.HasIndex(x => x.Id).IsUnique();
             builder.HasKey(x => x.Id);
         }
-}
+    }
 }
