@@ -1,13 +1,14 @@
 import { ApiResponse } from "../model/ApiResponse";
 import { DataTableDto } from "../model/DataTableDto";
+import { LookupDto } from "../model/lookup/LookupDto";
 import { UserLoginRequestDto } from "../model/UserLoginRequestDto";
 import { LocalStorageService } from "./LocalStorageService";
 import { ToastService } from "./ToastService";
 import { TokenService } from "./TokenService";
 
 export default class ApiService {
-  static serverUrl = "https://alexps.gr/api/";
-  // static serverUrl = "http://localhost:8080/api/";
+  // static serverUrl = "https://alexps.gr/api/";
+  static serverUrl = "http://localhost:8080/api/";
 
   public static async get<TEntity>(
     controller: string,
@@ -15,6 +16,14 @@ export default class ApiService {
   ): Promise<TEntity | null> {
     const url = this.serverUrl + controller + "/" + id;
     return await this.apiRequest(url, "GET");
+  }
+
+  public static async getDataLookup(
+    controller: string,
+    data: LookupDto
+  ): Promise<LookupDto | null> {
+    const url = this.serverUrl + controller + "/Lookup";
+    return await this.apiRequest(url, "POST", data);
   }
 
   public static async getDataGrid<TEntity>(
@@ -106,12 +115,13 @@ export default class ApiService {
                 ToastService.showError(value)
               )
             );
-          } else {
-            ToastService.showError(
-              "Something unexpected happend! API call was not successfull..."
-            );
-            console.log(2);
           }
+          //  else {
+          //   ToastService.showError(
+          //     "Something unexpected happend! API call was not successfull..."
+          //   );
+          //   console.log(2);
+          // }
           return null;
         }
 

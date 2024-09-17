@@ -61,7 +61,36 @@ namespace TVServiceCRM.Server.Controllers
             return new ApiResponse<ApplicationUser>().SetSuccessResponse(applicationUser, "success", "Role not found!");
         }
 
+        // PUT: api/Users/5
+        [HttpPut("{id}")]
+        public async Task<IActionResult> Update(string id, ApplicationUser applicationUser)
+        {
+            if (id != applicationUser.Id)
+                return BadRequest();
 
+            if (applicationUser.Id == null)
+                return BadRequest();
+
+
+            ApplicationUser? user = await _userManager.FindByIdAsync(applicationUser.Id);
+            if (user == null)
+                return BadRequest();
+
+            user.RoleId = applicationUser.RoleId;
+            IdentityRole? role = await _roleManager.FindByIdAsync(applicationUser.RoleId);
+            if (role == null)
+                return BadRequest();
+
+
+            List<string> userRoles = (await _userManager.GetRolesAsync(user)).ToList();
+            await _userManager.RemoveFromRolesAsync(user,userRoles);
+            await _userManager.AddToRoleAsync(user, role.Name);
+            await _userManager.UpdateAsync(user);
+            
+            //await _userManager.RemoveFromRoleAsync()
+            
+            return Ok();
+        }
 
         // POST: api/Users/GetDataTable
         [HttpPost("GetDataTable")]
@@ -103,10 +132,13 @@ namespace TVServiceCRM.Server.Controllers
 
 
             // Retrieve Data.
-            List<ApplicationUser> result = await _dataService.Query.Users.ToListAsync();
-            result.ForEach(async x =>
+            List<ApplicationUser> applicationUsers = await _dataService.Query.Users.ToListAsync();
+            applicationUsers.ForEach(async x =>
             {
-                x.RoleId = (await _userManager.GetRolesAsync(x)).First();
+                string userRole = (await _userManager.GetRolesAsync(x)).First();
+                IdentityRole? role = await _roleManager.FindByNameAsync(userRole);
+                if(role != null)
+                    x.RoleId = await _roleManager.GetRoleIdAsync(role);
             });
 
 
@@ -118,7 +150,7 @@ namespace TVServiceCRM.Server.Controllers
             //    dataTable.PageCount.Value,
             //    dataTable.Page.Value
             //);
-            List<UserDto> userDto = _mapper.Map<List<UserDto>>(result);
+            List<UserDto> userDto = _mapper.Map<List<UserDto>>(applicationUsers);
 
             //IdentityRoleDto.SelectMany(x => x.ContactInformations).ToList().ForEach(x => x.IdentityRole = null);
             //IdentityRoleDto.SelectMany(x => x.Tickets).ToList().ForEach(x => x.IdentityRole = null);

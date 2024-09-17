@@ -5,6 +5,7 @@ import { InputText } from "primereact/inputtext";
 import ApiService from "../../services/ApiService";
 import { ToastService } from "../../services/ToastService";
 import { UserDto } from "../../model/UserDto";
+import LookupComponent from "../../components/dropdown/LookupComponent";
 
 interface IField {
   parentUserDto: UserDto;
@@ -20,6 +21,8 @@ export default function UserForm({
   formMode,
   onAfterSave,
   triggerSaveForm,
+  onDisableSaveButton,
+  onEnableSaveButton,
 }: IField) {
   const [userDto, setUserDto] = useState(parentUserDto);
   const isFirstRender = React.useRef(true);
@@ -62,12 +65,21 @@ export default function UserForm({
     }
   };
 
+  const handlLookupChange = (id: string) => {
+    userDto.roleId = id;
+    setUserDto({ ...userDto });
+  };
+
   const handleChange = (event: React.ChangeEvent<any>) => {
     const name = event.target.name;
     const value = event.target.value;
 
     userDto[name] = value;
     setUserDto({ ...userDto });
+  };
+  const isCustomChange = (isCustom: boolean) => {
+    if (isCustom && onDisableSaveButton) onDisableSaveButton();
+    if (!isCustom && onEnableSaveButton) onEnableSaveButton();
   };
 
   // Load initial data.
@@ -83,7 +95,7 @@ export default function UserForm({
 
   return (
     <>
-      <Card title="Role ">
+      <Card title="User">
         <form>
           <div className="flex align-items-center justify-content-center">
             <div className="field">
@@ -93,9 +105,10 @@ export default function UserForm({
                 name="userName"
                 value={userDto.userName}
                 onChange={handleChange}
-                disabled={
-                  formMode !== FormMode.ADD && formMode !== FormMode.EDIT
-                }
+                // disabled={
+                //   formMode !== FormMode.ADD && formMode !== FormMode.EDIT
+                // }
+                disabled
               />
             </div>
             <div className="field">
@@ -105,21 +118,22 @@ export default function UserForm({
                 name="email"
                 value={userDto.email}
                 onChange={handleChange}
-                disabled={
-                  formMode !== FormMode.ADD && formMode !== FormMode.EDIT
-                }
+                disabled
+                // disabled={
+                //   formMode !== FormMode.ADD && formMode !== FormMode.EDIT
+                // }
               />
             </div>
             <div className="field">
               <label htmlFor="roleId">Role Name</label>
-              <InputText
-                id="roleId"
-                name="roleId"
-                value={userDto.roleId}
-                onChange={handleChange}
-                disabled={
-                  formMode !== FormMode.ADD && formMode !== FormMode.EDIT
-                }
+              <LookupComponent
+                controller="roles"
+                idValue={userDto.roleId}
+                isEditable={true}
+                isEnabled={formMode === FormMode.EDIT}
+                allowCustom={false}
+                isCustomChange={isCustomChange}
+                onChange={handlLookupChange}
               />
             </div>
           </div>

@@ -4,6 +4,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Query;
 using TVServiceCRM.Server.Model.Models;
 using System.Linq.Expressions;
+using TVServiceCRM.Server.Model.Dtos.Lookup;
+using Microsoft.AspNetCore.Identity;
 
 namespace TVServiceCRM.Server.Business.Repository
 {
@@ -167,6 +169,26 @@ namespace TVServiceCRM.Server.Business.Repository
                 qry = qry.Skip((pageIndex - 1) * pageSize).Take(pageSize);
 
             return await qry.ToListAsync();
+        }
+
+        public IQueryable<TEntity> GetLookup(
+            Expression<Func<TEntity, bool>>? filter,
+            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderingInfo,
+            int skip = 10,
+            int take = 1)
+        {
+            var qry = (IQueryable<TEntity>)_set;
+
+            if (filter != null)
+                qry = qry.Where(filter);
+
+            if (orderingInfo != null)
+                qry = orderingInfo(qry);
+
+            if (skip >= 0 && take >= 0)
+                qry = qry.Skip(skip).Take(take);
+
+            return qry;
         }
 
         public async Task<List<TEntity>> GetFiltered(Expression<Func<TEntity, bool>> filter)

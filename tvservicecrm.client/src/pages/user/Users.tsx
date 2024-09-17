@@ -123,8 +123,8 @@ export default function Users() {
           onButtonClick={onDataTableClick}
           controller="users"
           enableGridRowActions={true}
+          enableAddAction={false}
           filterDisplay={DataTableFilterDisplayEnum.ROW}
-          enableAddAction={true}
           dataTable={datatableDto}
           dataTableColumns={dataTableColumns}
           triggerRefreshData={onRefreshDataTable}

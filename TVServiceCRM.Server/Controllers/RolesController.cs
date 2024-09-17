@@ -9,6 +9,9 @@ using Microsoft.EntityFrameworkCore;
 using TVServiceCRM.Server.Model.Dtos.DataTable;
 using AutoMapper;
 using TVServiceCRM.Server.Model.Dtos.Identity;
+using TVServiceCRM.Server.Model.Dtos.Lookup;
+using System.Linq.Expressions;
+using TVServiceCRM.Server.Business.Services;
 
 namespace TVServiceCRM.Server.Controllers
 {
@@ -61,7 +64,7 @@ namespace TVServiceCRM.Server.Controllers
             if (role == null)
                 return new ApiResponse<IdentityRoleDto>().SetErrorResponse("errors", "Role not found!");
 
-            IdentityRoleDto identityRoleDto = _mapper.Map< IdentityRoleDto >(role);
+            IdentityRoleDto identityRoleDto = _mapper.Map<IdentityRoleDto>(role);
             return new ApiResponse<IdentityRoleDto>().SetSuccessResponse(identityRoleDto);
         }
 
@@ -77,6 +80,37 @@ namespace TVServiceCRM.Server.Controllers
         //    return Ok(claims);
         //}
 
+        // POST: api/controller/lookup
+        [HttpPost("Lookup")]
+        public async Task<ApiResponse<LookupDto>> Lookup([FromBody] LookupDto lookupDto)
+        {
+            List<LookupOptionDto> lookupOptions;
+            if (lookupDto.Filter?.Id != null && lookupDto.Filter?.Id.Length>0)
+            {
+                lookupOptions = await _roleManager.Roles
+                    .Where(x=>lookupDto.Filter.Id.Contains(x.Id))
+                    .Select(x => new LookupOptionDto() { Id = x.Id, Value = x.Name ?? "" })
+                    .ToListAsync();
+            }
+            else if (lookupDto.Filter?.Value != null && lookupDto.Filter?.Value.Length > 0)
+            {
+                lookupOptions = await _roleManager.Roles
+                    .Where(x => x.Name.Contains(lookupDto.Filter.Value))
+                    .Select(x => new LookupOptionDto() { Id = x.Id, Value = x.Name ?? "" })
+                    .ToListAsync();
+            }
+            else
+            {
+
+                lookupOptions = await _roleManager.Roles
+                    .Select(x => new LookupOptionDto() { Id = x.Id, Value = x.Name ?? "" })
+                    .ToListAsync();
+            }
+
+            lookupDto.Data = lookupOptions;
+
+            return new ApiResponse<LookupDto>().SetSuccessResponse(lookupDto);
+        }
 
         // POST: api/IdentityRoles/GetDataTable
         [HttpPost("GetDataTable")]

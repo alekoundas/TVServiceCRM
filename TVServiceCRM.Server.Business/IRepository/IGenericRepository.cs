@@ -42,5 +42,11 @@ namespace TVServiceCRM.Server.Business.IRepository
             List<Func<IQueryable<TEntity>, IIncludableQueryable<TEntity, object>>>? includes = null,
             int pageSize = 10,
             int pageIndex = 1);
+
+        IQueryable<TEntity> GetLookup(
+            Expression<Func<TEntity, bool>>? filter,
+            Func<IQueryable<TEntity>, IOrderedQueryable<TEntity>>? orderingInfo,
+            int skip = 10,
+            int take = 1);
     }
 }
