@@ -11,7 +11,8 @@ interface IField {
   isEditable: boolean;
   isEnabled: boolean;
   allowCustom: boolean;
-  isCustomChange?: (isCustom: boolean) => void;
+  onCustomSave?: (value: string) => Promise<number | null>;
+  onCustomChange?: (isCustom: boolean) => void;
   onChange?: (id: string) => void;
 }
 
@@ -21,7 +22,8 @@ export default function LookupComponent({
   isEditable,
   isEnabled,
   allowCustom,
-  isCustomChange,
+  onCustomChange,
+  onCustomSave,
   onChange,
 }: IField) {
   const [isVisible, setIsVisible] = useState(false);
@@ -39,16 +41,20 @@ export default function LookupComponent({
     });
   };
 
+  const setSelectedOptionById = (id: string) => {
+    const dto = new LookupDto();
+    dto.filter.id = id;
+    refreshData(dto).then((x) => {
+      if (x?.data && x?.data[0]?.value) {
+        setSelectedOption(x.data[0].value);
+      }
+    });
+  };
+
   // Load intitial data.
   React.useEffect(() => {
     if (idValue) {
-      const dto = new LookupDto();
-      dto.filter.id = idValue;
-      refreshData(dto).then((x) => {
-        if (x?.data && x?.data[0]?.value) {
-          setSelectedOption(x.data[0].value);
-        }
-      });
+      setSelectedOptionById(idValue);
     }
   }, []);
 
@@ -59,16 +65,25 @@ export default function LookupComponent({
     });
   };
 
-  const onSaveCustom = (event: any) => {
-    if (event) event.caller;
-    selectedOption;
+  const onSaveCustom = () => {
+    if (onCustomSave && selectedOption)
+      onCustomSave(selectedOption).then((id) => {
+        if (!id) return;
+
+        setIsVisible(false);
+        setSelectedOptionById(id.toString());
+        refreshData(lookupDto).then((resultLookupDto) => {
+          if (resultLookupDto) setLookupDto({ ...resultLookupDto });
+          else setLookupDto(new LookupDto());
+        });
+      });
   };
 
   const handleChange = (event: DropdownChangeEvent): void => {
     // Stupid PrimeRact Dropdown doesnt retrieve object but just a string.
     // This "if" statement means that user selected an option.
     if (event.originalEvent) {
-      if (isCustomChange) isCustomChange(false);
+      if (onCustomChange) onCustomChange(false);
 
       setIsVisible(false);
       setSelectedOption(event.value);
@@ -76,7 +91,7 @@ export default function LookupComponent({
 
     // This else statement means that user set a custom value.
     else {
-      if (isCustomChange) isCustomChange(true);
+      if (onCustomChange) onCustomChange(true);
       if (allowCustom) setIsVisible(true);
 
       lookupDto.filter.value = event.value;

@@ -106,7 +106,7 @@ namespace TVServiceCRM.Server.Controllers
 
             // Filter.
             if (lookupDto?.Filter?.Value != null && lookupDto.Filter.Value.Length > 0)
-                filterQuery.Add(x => x.Title.Contains(lookupDto.Filter.Value));
+                filterQuery.Add(x => x.Title.ToLower().StartsWith(lookupDto.Filter.Value.ToLower()));
 
             if (lookupDto?.Filter?.Id != null && lookupDto.Filter.Id.Length > 0)
             {
@@ -131,11 +131,15 @@ namespace TVServiceCRM.Server.Controllers
         public async Task<ApiResponse<Maker>> Update(int? id, [FromBody] MakerDto makerDto)
         {
             // Checks.
-            if (id == null || id!= makerDto.Id)
+            if (id == null || id != makerDto.Id)
                 return new ApiResponse<Maker>().SetErrorResponse("error", "Maker name not not set!");
 
             Maker maker = _mapper.Map<Maker>(makerDto);
             _dataService.Makers.Update(maker);
+            int isSuccess = await _dataService.Makers.SaveChangesAsync();
+
+            if (isSuccess == 0)
+                return new ApiResponse<Maker>().SetErrorResponse("error", "Error occured while updating.");
 
             return new ApiResponse<Maker>().SetSuccessResponse(maker);
         }

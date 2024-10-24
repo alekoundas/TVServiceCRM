@@ -5,12 +5,14 @@ import { InputText } from "primereact/inputtext";
 import ApiService from "../../services/ApiService";
 import { ToastService } from "../../services/ToastService";
 import { MakerModelDto } from "../../model/MakerModelDto";
+import LookupComponent from "../../components/dropdown/LookupComponent";
+import { MakerDto } from "../../model/MakerDto";
 
 interface IField {
   data: MakerModelDto;
   formMode: FormMode;
-  // onEnableSaveButton?: () => void;
-  // onDisableSaveButton?: () => void;
+  onEnableSaveButton?: () => void;
+  onDisableSaveButton?: () => void;
   onAfterSave: () => void;
   triggerSaveForm?: () => void;
 }
@@ -18,8 +20,8 @@ interface IField {
 export default function MakerModelForm({
   data,
   formMode,
-  // onEnableSaveButton,
-  // onDisableSaveButton,
+  onEnableSaveButton,
+  onDisableSaveButton,
   onAfterSave,
   triggerSaveForm,
 }: IField) {
@@ -39,6 +41,15 @@ export default function MakerModelForm({
       handleSave();
     }
   }, [triggerSaveForm]);
+
+  const handleCustomSave = async (value: string): Promise<number | null> => {
+    const maker = new MakerDto();
+    {
+      title: value;
+    }
+
+    return await ApiService.create("makers", maker).then((x) => x?.id ?? null);
+  };
 
   const handleSave = () => {
     if (formMode == FormMode.EDIT) {
@@ -72,6 +83,16 @@ export default function MakerModelForm({
     setMakerModelDto({ ...makerModelDto });
   };
 
+  const isCustomChange = (isCustom: boolean) => {
+    if (isCustom && onDisableSaveButton) onDisableSaveButton();
+    if (!isCustom && onEnableSaveButton) onEnableSaveButton();
+  };
+
+  const handlLookupChange = (id: string) => {
+    makerModelDto.makerId = +id;
+    setMakerModelDto({ ...makerModelDto });
+  };
+
   // Load initial data.
   React.useEffect(() => {
     if (formMode === FormMode.EDIT || formMode === FormMode.VIEW) {
@@ -98,6 +119,22 @@ export default function MakerModelForm({
                 value={makerModelDto.name}
                 onChange={handleChange}
                 disabled={formMode !== FormMode.ADD}
+              />
+            </div>
+
+            <div className="field">
+              <label htmlFor="roleId">Maker</label>
+              <LookupComponent
+                controller="makers"
+                idValue={makerModelDto.roleId}
+                isEditable={true}
+                isEnabled={
+                  formMode === FormMode.EDIT || formMode === FormMode.ADD
+                }
+                allowCustom={true}
+                onCustomChange={isCustomChange}
+                onCustomSave={handleCustomSave}
+                onChange={handlLookupChange}
               />
             </div>
           </div>

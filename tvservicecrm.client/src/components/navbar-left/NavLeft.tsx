@@ -4,7 +4,7 @@ import { MenuItem } from "primereact/menuitem";
 import { Toast } from "primereact/toast";
 import { useNavigate } from "react-router-dom";
 
-function NavLeft() {
+export default function NavLeft() {
   const toast = useRef<Toast>(null);
   const navigate = useNavigate();
 
@@ -79,5 +79,3 @@ function NavLeft() {
     </>
   );
 }
-
-export default NavLeft;

@@ -136,6 +136,10 @@ namespace TVServiceCRM.Server.Controllers
 
             MakerModel MakerModel = _mapper.Map<MakerModel>(MakerModelDto);
             _dataService.MakerModels.Update(MakerModel);
+            int isSuccess = await _dataService.Makers.SaveChangesAsync();
+
+            if (isSuccess == 0)
+                return new ApiResponse<MakerModel>().SetErrorResponse("error", "Error occured while updating.");
 
             return new ApiResponse<MakerModel>().SetSuccessResponse(MakerModel);
         }

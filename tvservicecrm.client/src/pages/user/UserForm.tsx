@@ -132,7 +132,7 @@ export default function UserForm({
                 isEditable={true}
                 isEnabled={formMode === FormMode.EDIT}
                 allowCustom={false}
-                isCustomChange={isCustomChange}
+                onCustomChange={isCustomChange}
                 onChange={handlLookupChange}
               />
             </div>
